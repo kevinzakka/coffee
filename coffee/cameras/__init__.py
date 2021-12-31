@@ -1,10 +1,10 @@
-from .camera import CameraFrame
-from .camera_pybullet import (Intrinsic, PybulletCamera,
-                              PybulletEndEffectorCamera)
+from .base import CameraFrame
+from .camera import Camera, CameraConfig, EndEffectorCamera, Intrinsic
 
 __all__ = [
+    "CameraConfig",
     "CameraFrame",
-    "PybulletCamera",
-    "PybulletEndEffectorCamera",
+    "Camera",
+    "EndEffectorCamera",
     "Intrinsic",
 ]

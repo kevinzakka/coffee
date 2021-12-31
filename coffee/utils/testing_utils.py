@@ -4,8 +4,6 @@ from absl.testing import absltest, parameterized
 
 from coffee.client import BulletClient, ClientConfig, ConnectionMode
 
-_ASSETS_PATH = "/Users/kevin/repos/coffee/vendor"
-
 
 class BulletMultiDirectTestCase(absltest.TestCase):
     """PyBullet absltest.TestCase that uses a DIRECT connection for each test method.
@@ -22,7 +20,6 @@ class BulletMultiDirectTestCase(absltest.TestCase):
             mode=ConnectionMode.DIRECT,
             config=ClientConfig(realtime=False, render_shadows=False),
         )
-        self.client.setAdditionalSearchPath(_ASSETS_PATH)
 
     def tearDown(self) -> None:
         del self.client
@@ -36,7 +33,6 @@ class BulletMultiDirectParameterizedTestCase(parameterized.TestCase):
             mode=ConnectionMode.DIRECT,
             config=ClientConfig(realtime=False, render_shadows=False),
         )
-        self.client.setAdditionalSearchPath(_ASSETS_PATH)
 
     def tearDown(self) -> None:
         del self.client

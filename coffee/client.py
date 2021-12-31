@@ -16,6 +16,7 @@ import numpy as np
 import pybullet as p
 from dm_robotics.geometry.geometry import Pose
 
+from coffee import ASSETS_PATH
 from coffee.utils import geometry_utils
 
 
@@ -105,15 +106,14 @@ class BulletClient:
         # Thread locks to safely access thread-unsafe attributes.
         self._realtime_lock = threading.Lock()
         self._thread_alive_lock = threading.Lock()
-        if self.post_init_setup:
-            # # Thread locks to safely access thread-unsafe attributes.
-            # self._realtime_lock = threading.Lock()
-            # self._thread_alive_lock = threading.Lock()
 
+        if self.post_init_setup:
             self._egl_setup()
             self._physics_setup()
             self._simulation_step_setup()
             self._gui_setup()
+
+        self.setAdditionalSearchPath(ASSETS_PATH)
 
     def __repr__(self) -> str:
         return f"BulletClient(client_id={self.client_id}, pid={self.pid})"
@@ -210,6 +210,15 @@ class BulletClient:
     def step(self) -> None:
         """Shorter alias to step the simulation."""
         self.stepSimulation()
+
+    def infinite_step(self) -> None:
+        """Step the simulation in an infinite loop. Exit if cntrl-C is pressed."""
+        try:
+            while True:
+                self.step()
+                time.sleep(0.01)
+        except KeyboardInterrupt:
+            pass
 
     @contextlib.contextmanager
     def disable_rendering(self) -> Iterator[None]:

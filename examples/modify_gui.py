@@ -8,8 +8,6 @@ import dcargs
 
 from coffee import client
 
-_ASSETS_PATH = "/Users/kevin/repos/coffee/vendor"
-
 
 @dataclasses.dataclass(frozen=True)
 class GuiArgs:
@@ -24,7 +22,6 @@ def main(args: GuiArgs) -> None:
         mode=client.ConnectionMode.GUI,
         config=client.ClientConfig(**dataclasses.asdict(args)),
     )
-    bullet_client.setAdditionalSearchPath(_ASSETS_PATH)
 
     bullet_client.load_urdf("plane/plane.urdf")
 

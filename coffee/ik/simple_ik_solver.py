@@ -14,7 +14,7 @@ from coffee.utils import geometry_utils
 
 @dataclasses.dataclass
 class SimpleIKSolver:
-    """A simple wrapper around PyBullet's IK solver."""
+    """A wrapper around PyBullet's IK solver."""
 
     pb_client: BulletClient
     """The pybullet client."""

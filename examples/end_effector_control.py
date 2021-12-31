@@ -1,14 +1,13 @@
 import math
 import time
+
 import numpy as np
+from dm_robotics.geometry import geometry, pose_distribution
+
 from coffee import client
 from coffee.manipulators.manipulator import Manipulator, ManipulatorConfig
 
-from dm_robotics.geometry import geometry
-from dm_robotics.geometry import pose_distribution
-
-ASSETS_PATH = "/Users/kevin/repos/coffee/vendor"
-_HOMEJ = [j * math.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.]]
+_HOMEJ = [j * math.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.0]]
 _NUM_POSES = 10
 _SEED = 42
 
@@ -28,7 +27,6 @@ def main() -> None:
         mode=client.ConnectionMode.GUI,
         config=client.ClientConfig(realtime=True, render_shadows=False),
     )
-    bullet_client.setAdditionalSearchPath(ASSETS_PATH)
 
     # Instantiate the manipulator.
     manipulator_config = ManipulatorConfig(

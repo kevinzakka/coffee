@@ -1,27 +1,16 @@
-from typing import List
 import math
 import time
+from typing import List
+
 import numpy as np
+from dm_robotics.geometry import geometry, pose_distribution
+
 from coffee import client
 from coffee.manipulators.manipulator import Manipulator, ManipulatorConfig
 
-from dm_robotics.geometry import geometry, pose_distribution
-from dm_robotics.transformations import transformations as tr
-
-
-_ASSETS_PATH = "/Users/kevin/repos/coffee/vendor"
-_HOMEJ = [j * math.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.]]
+_HOMEJ = [j * math.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.0]]
 _CUBE_THICKNESS = 0.045
 _CUBE_SCALE = 2.0
-
-
-def hang(bullet_client: client.BulletClient) -> None:
-    try:
-        while True:
-            bullet_client.step()
-            time.sleep(0.01)
-    except KeyboardInterrupt:
-        return
 
 
 def get_eef_trajectory(
@@ -34,19 +23,19 @@ def get_eef_trajectory(
     delta = _CUBE_SCALE * _CUBE_THICKNESS / 2
     ret.append(  # pre-grasp
         geometry.Pose(
-            np.array(cube_pose.position) + np.array([0., 0., delta + 0.1]),
+            np.array(cube_pose.position) + np.array([0.0, 0.0, delta + 0.1]),
             current_pose.quaternion,
         )
     )
     ret.append(  # grasp
         geometry.Pose(
-            np.array(cube_pose.position) + np.array([0., 0., delta]),
+            np.array(cube_pose.position) + np.array([0.0, 0.0, delta]),
             current_pose.quaternion,
         )
     )
     ret.append(  # post-grasp
         geometry.Pose(
-            np.array(cube_pose.position) + np.array([0., 0., delta + 0.1]),
+            np.array(cube_pose.position) + np.array([0.0, 0.0, delta + 0.1]),
             current_pose.quaternion,
         )
     )
@@ -59,7 +48,6 @@ def main() -> None:
         mode=client.ConnectionMode.GUI,
         config=client.ClientConfig(realtime=True, render_shadows=False),
     )
-    bullet_client.setAdditionalSearchPath(_ASSETS_PATH)
 
     # Instantiate the manipulator.
     manipulator_config = ManipulatorConfig(
@@ -106,7 +94,7 @@ def main() -> None:
         max_pose_bounds=[0.5, +0.5, 0.0, 0, 0, 0],
     )
 
-    hang(bullet_client)
+    bullet_client.infinite_step()
 
     np.random.seed(42)
     rng = np.random.RandomState(42)

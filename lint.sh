@@ -6,8 +6,8 @@ python --version
 set -e
 set -x
 
-black coffee/
-isort coffee/
+black .
+isort .
 
-mypy coffee/
-flake8 coffee/
+mypy .
+flake8 .

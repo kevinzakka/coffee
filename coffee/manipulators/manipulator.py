@@ -62,7 +62,7 @@ class Manipulator:
         manipulator_config: ManipulatorConfig,
         pb_client: BulletClient,
     ) -> Manipulator:
-        # NOTE(kevin): We might want to look at using additional flags here.
+        # NOTE(kevin): Possibly look into using additional flags here.
         flags = pb_client.URDF_ENABLE_CACHED_GRAPHICS_SHAPES
 
         # Load the manipulator body from the URDF.
