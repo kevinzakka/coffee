@@ -1,5 +1,5 @@
-from typing import List, Tuple, Union
+from typing import Sequence, Union
 
 import numpy as np
 
-Array = Union[np.ndarray, List, Tuple]
+Array = Union[np.ndarray, Sequence[float]]

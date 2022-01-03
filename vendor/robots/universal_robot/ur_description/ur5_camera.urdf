@@ -217,7 +217,6 @@
     <parent link="ee_link"/>
     <child link="gripper_cam"/>
   </joint>
-
   <link name="gripper_cam">
     <contact>
       <spinning_friction value="0.1"/>

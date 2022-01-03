@@ -7,7 +7,7 @@ set -e
 set -x
 
 black .
-isort .
+isort . --profile black
 
 mypy .
 flake8 .

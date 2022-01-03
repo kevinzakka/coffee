@@ -89,6 +89,8 @@ def main() -> None:
         useFixedBase=True,
     )
 
+    bullet_client.infinite_step()
+
     pos_dist = pose_distribution.UniformPoseDistribution(
         min_pose_bounds=[-0.5, -0.5, 0.0, 0, 0, 0],
         max_pose_bounds=[0.5, +0.5, 0.0, 0, 0, 0],

@@ -1,6 +1,8 @@
 # Todo
 
 - [ ] camera module
+    - [ ] wrap up other cameras + unit tests
+    - [ ] orthographic camera
 - [ ] path planning
 - [ ] grippers
 - [ ] factory functions

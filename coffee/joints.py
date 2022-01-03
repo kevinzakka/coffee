@@ -28,12 +28,24 @@ class JointState:
 
 @dataclasses.dataclass(frozen=True)
 class LinkState:
+    """Holds the state of a link.
+
+    Attributes:
+        link_world_position: Position of the link COM in world coordinates.
+        link_world_orientation: Orientation of the link COM in world coordinates.
+        world_link_frame_position: Position of the URDF link frame in world coordinates.
+        world_link_frame_orientation: Orientation of the URDF link frame in world
+            coordinates.
+    """
+
     link_world_position: Tuple[float, ...]
     link_world_orientation: Tuple[float, ...]
     local_inerital_frame_position: Tuple[float, ...]
     local_inerital_frame_orientation: Tuple[float, ...]
     world_link_frame_position: Tuple[float, ...]
     world_link_frame_orientation: Tuple[float, ...]
+    world_link_linear_velocity: Optional[Tuple[float, ...]] = None
+    world_link_angular_velocity: Optional[Tuple[float, ...]] = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -75,6 +87,9 @@ class Joints:
     controllable_joints: Tuple[int, ...]
     non_controllable_joints: Tuple[int, ...]
     joint_resting_configuration: Optional[np.ndarray]
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(bodyid={self.body_id}, dof={self.dof})"
 
     # Factory methods.
 
@@ -130,14 +145,30 @@ class Joints:
     def get_link_name_from_joint_index(self, joint_index: int) -> str:
         return self.joints_info[joint_index].link_name
 
+    def contains_link(self, link_name: str) -> bool:
+        """Returns True if the given link name is present in the URDF."""
+        for joint_info in self.joints_info:
+            if joint_info.link_name == link_name:
+                return True
+        return False
+
+    def contains_joint(self, joint_name: str) -> bool:
+        """Returns True if the given joint name is present in the URDF."""
+        for joint_info in self.joints_info:
+            if joint_info.joint_name == joint_name:
+                return True
+        return False
+
     @property
     def name2index(self) -> Dict[str, int]:
+        """A dictionary mapping joint names to joint indices."""
         return {
             joint_info.joint_name: i for i, joint_info in enumerate(self.joints_info)
         }
 
     @property
     def index2name(self) -> Dict[int, str]:
+        """A dictionary mapping joint indices to joint names."""
         return {
             i: joint_info.joint_name for i, joint_info in enumerate(self.joints_info)
         }
