@@ -11,6 +11,8 @@ from coffee.hints import Array
 
 
 class JointType(enum.Enum):
+    """The type of joint."""
+
     REVOLUTE = 0
     PRISMATIC = 1
     SPHERICAL = 2
@@ -20,6 +22,17 @@ class JointType(enum.Enum):
 
 @dataclasses.dataclass(frozen=True)
 class JointState:
+    """Holds the state of a joint.
+
+    Attributes:
+        joint_position: The position of the joint.
+        joint_velocity: The velocity of the joint.
+        joint_reaction_forces: Joint reaction forces. If torque sensing is disabled for
+            the joint, these will be all zeros.
+        applied_joint_motor_torque: The motor torque applied during the last simulation
+            step.
+    """
+
     joint_position: float
     joint_velocity: float
     joint_reaction_forces: Tuple[float, ...]
@@ -50,6 +63,8 @@ class LinkState:
 
 @dataclasses.dataclass(frozen=True)
 class JointInfo:
+    """Holds joint information."""
+
     joint_index: int
     joint_name: str
     joint_type: int
@@ -80,6 +95,13 @@ class Joints:
     These are parsed from the URDF. The extracted information is useful for things like
     inverse kinematics, which can take advantage of rest poses and joint limits to
     refine its solution.
+
+    Attributes:
+        body_id:
+        joints_info:
+        controllable_joints:
+        non_controllable_joints:
+        joint_resting_configuration:
     """
 
     body_id: int

@@ -181,8 +181,8 @@ class IKSolver:
             # joints are closer to the nullspace reference.
             if linear_err <= linear_tol and angular_err <= angular_tol:
                 success = True
-                nullspace_jnt_qpos_err = np.linalg.norm(
-                    joint_qpos - nullspace_reference
+                nullspace_jnt_qpos_err = float(
+                    np.linalg.norm(joint_qpos - nullspace_reference)
                 )
                 if nullspace_jnt_qpos_err < nullspace_jnt_qpos_min_err:
                     nullspace_jnt_qpos_min_err = nullspace_jnt_qpos_err
@@ -258,10 +258,10 @@ class IKSolver:
         cur_pose = self.forward_kinematics(shadow=True)
 
         # Error computation.
-        linear_err = np.linalg.norm(ref_pose.position - cur_pose.position)
+        linear_err = float(np.linalg.norm(ref_pose.position - cur_pose.position))
         err_quat = tr.quat_diff_active(ref_pose.quaternion, cur_pose.quaternion)
         err_axis_angle = tr.quat_to_axisangle(err_quat)
-        angular_err = np.linalg.norm(err_axis_angle)
+        angular_err = float(np.linalg.norm(err_axis_angle))
 
         return IKSolution(np.array(qpos), linear_err, angular_err)
 

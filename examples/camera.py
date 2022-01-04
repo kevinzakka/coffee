@@ -1,6 +1,5 @@
-import math
-
 import matplotlib.pyplot as plt
+import numpy as np
 from dm_robotics.geometry import geometry
 
 from coffee import cameras, client
@@ -21,7 +20,7 @@ def main() -> None:
     manipulator_config = ManipulatorConfig(
         urdf="robots/universal_robot/ur_description/ur5.urdf",
         joint_resting_configuration=[
-            j * math.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.0]
+            j * np.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.0]
         ],
         max_joint_position_error=1e-4,
         max_joint_velocity_error=5e-2,
@@ -54,8 +53,28 @@ def main() -> None:
     plt.imshow(cam.render().color)
     plt.show()
 
+    cube_id = bullet_client.load_urdf(
+        "block.urdf",
+        scaling=2.0,
+        pose=geometry.Pose([0.6, 0, 0]),
+        useFixedBase=True,
+    )
+    for _ in range(int(2 / bullet_client.config.physics_timestep)):
+        bullet_client.step()
+
     manipulator.go_home(disable_dynamics=True)
 
+    plt.imshow(cam.render().color)
+    plt.show()
+
+    eef_pose = manipulator.get_eef_pose()
+    cube_pose = bullet_client.get_body_state(cube_id).pose
+    delta = 0.045
+    pose = geometry.Pose(
+        np.array(cube_pose.position) + np.array([0.0, 0.0, delta]),
+        eef_pose.quaternion,
+    )
+    manipulator.set_eef_pose(pose, kp=3e-2)
     plt.imshow(cam.render().color)
     plt.show()
 

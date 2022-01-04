@@ -3,10 +3,8 @@ from .camera import (
     CameraParams,
     CameraPose,
     MoveableCamera,
-    MultiCamera,
     RelativeToCamera,
     RelativeToCameraPose,
-    RelativeToMultiCamera,
     RPYCameraPose,
     URDFCamera,
     URDFCameraPose,
@@ -24,6 +22,4 @@ __all__ = [
     "MoveableCamera",
     "URDFCamera",
     "RelativeToCamera",
-    "MultiCamera",
-    "RelativeToMultiCamera",
 ]

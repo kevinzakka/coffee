@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import List, Optional, Protocol, Tuple
+from typing import Optional, Protocol, Tuple
 
 import numpy as np
 import pybullet as p
@@ -452,109 +452,3 @@ class RelativeToCamera(Camera):
 class TrackingCamera:
     # TODO(kevin): Reminder to implement this.
     ...
-
-
-@dataclasses.dataclass(frozen=True)
-class MultiCamera:
-    """A group of `Cameras` that render a scene from potentially different views."""
-
-    pb_client: BulletClient
-    params: Tuple[CameraParams, ...]
-    cam_poses: Tuple[CameraPose, ...]
-
-    # Initialized in __post_init__.
-    viewmats: Tuple[np.ndarray, ...] = dataclasses.field(init=False)
-    projmats: Tuple[np.ndarray, ...] = dataclasses.field(init=False)
-
-    def __post_init__(self) -> None:
-        viewmats: List[np.ndarray] = []
-        projmats: List[np.ndarray] = []
-        for cam_pose, params in zip(self.cam_poses, self.params):
-            viewmats.append(cam_pose.as_view_matrix())
-            projmats.append(params.as_projection_matrix())
-        object.__setattr__(self, "viewmats", tuple(viewmats))
-        object.__setattr__(self, "projmats", tuple(projmats))
-
-    def _pre_render(self, cam_id: int) -> None:
-        ...
-
-    def _post_render(self, cam_id: int) -> None:
-        ...
-
-    def _render(
-        self,
-        cam_id: int,
-        depth: bool = False,
-        segmentation: bool = False,
-    ) -> CameraFrame:
-        depth_im, segm_im = None, None
-
-        if segmentation:
-            flags = self.pb_client.ER_SEGMENTATION_MASK_OBJECT_AND_LINKINDEX
-        else:
-            flags = self.pb_client.ER_NO_SEGMENTATION_MASK
-
-        if self.pb_client.egl_render:
-            renderer = self.pb_client.ER_BULLET_HARDWARE_OPENGL
-        else:
-            renderer = self.pb_client.ER_TINY_RENDERER
-
-        _, _, color_pix, depth_pix, segm_pix = self.pb_client.getCameraImage(
-            width=self.params[cam_id].width,
-            height=self.params[cam_id].height,
-            # NOTE(kevin): pybullet API expects flattened view and projection matrices.
-            viewMatrix=self.viewmats[cam_id].ravel(),
-            projectionMatrix=self.projmats[cam_id].ravel(),
-            shadow=self.pb_client.config.render_shadows,
-            flags=flags,
-            renderer=renderer,
-        )
-
-        # Get color image.
-        color_shape = (self.params[cam_id].height, self.params[cam_id].width, 4)
-        color_im = np.array(color_pix, dtype=np.uint8).reshape(color_shape)
-        color_im = color_im[:, :, :3]  # Eliminate alpha channel.
-
-        if depth:
-            # Get depth image by converting non-linear z-buffer to depth in meters, see:
-            # http://stackoverflow.com/a/6657284/1461210
-            depth_shape = (self.params[cam_id].height, self.params[cam_id].width)
-            znear, zfar = self.params[cam_id].znear, self.params[cam_id].zfar
-            z_const = 2.0 * znear * zfar
-            zfmzn = zfar - znear
-            zfpzn = zfar + znear
-            z_buffer = np.array(depth_pix).reshape(depth_shape)
-            z_n = 2.0 * z_buffer - 1.0  # [-1, 1] to [0, 1].
-            depth_im = z_const / (zfpzn - z_n * zfmzn)
-
-        if segmentation:
-            segm_im = np.array(segm_pix, dtype=np.uint32).reshape(depth_shape)
-
-        return CameraFrame(color_im, depth_im, segm_im)
-
-    # Public methods.
-
-    def render(
-        self,
-        depth: bool = False,
-        segmentation: bool = False,
-    ) -> List[CameraFrame]:
-        frames = []
-        for cam_id in range(len(self.params)):
-            self._pre_render(cam_id)
-            frames.append(self._render(cam_id, depth, segmentation))
-            self._post_render(cam_id)
-        return frames
-
-
-@dataclasses.dataclass(frozen=True)
-class RelativeToMultiCamera(MultiCamera):
-    """A `MultiPoseCamera` with poses defined relative to a PyBullet body."""
-
-    params: Tuple[CameraParams, ...]
-    cam_poses: Tuple[RelativeToCameraPose, ...]
-
-    def _pre_render(self, cam_id: int) -> None:
-        viewmats = list(self.viewmats)
-        viewmats[cam_id] = self.cam_poses[cam_id].as_view_matrix()
-        object.__setattr__(self, "viewmats", tuple(viewmats))

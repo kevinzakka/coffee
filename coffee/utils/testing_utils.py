@@ -15,7 +15,7 @@ class BulletMultiDirectTestCase(absltest.TestCase):
     def setUp(self) -> None:
         self.client = BulletClient.create(
             mode=ConnectionMode.DIRECT,
-            config=ClientConfig(realtime=False, render_shadows=False),
+            config=ClientConfig(realtime=False),
         )
 
     def tearDown(self) -> None:
@@ -28,7 +28,7 @@ class BulletMultiDirectParameterizedTestCase(parameterized.TestCase):
     def setUp(self) -> None:
         self.client = BulletClient.create(
             mode=ConnectionMode.DIRECT,
-            config=ClientConfig(realtime=False, render_shadows=False),
+            config=ClientConfig(realtime=False),
         )
 
     def tearDown(self) -> None:
