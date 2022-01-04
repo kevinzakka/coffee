@@ -27,7 +27,7 @@ class BodyState(NamedTuple):
 
 
 class ConnectionMode(enum.Enum):
-    """Pybullet client connection mode."""
+    """PyBullet client connection mode."""
 
     DIRECT = p.DIRECT
     GUI = p.GUI

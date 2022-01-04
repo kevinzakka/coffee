@@ -22,6 +22,14 @@ setup(
         ],
         "examples": [
             "dcargs",
+            "matplotlib",
+        ],
+        "develop": [
+            "isort",
+            "black",
+            "flake8",
+            "pytest",
+            "absl-py",
         ],
     },
 )

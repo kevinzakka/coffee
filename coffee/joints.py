@@ -11,7 +11,7 @@ from coffee.hints import Array
 
 
 class JointType(enum.Enum):
-    """The type of joint."""
+    """Enum for specifying the joint of type."""
 
     REVOLUTE = 0
     PRISMATIC = 1
