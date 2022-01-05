@@ -47,7 +47,7 @@ class ClientConfig:
     color: Optional[Tuple[int, int, int]] = None
     width: Optional[int] = None
     height: Optional[int] = None
-    gravity_constant: float = -9.81
+    gravity: Tuple[float, float, float] = (0.0, 0.0, -9.81)
     physics_timestep: float = 1.0 / 240.0
 
 
@@ -143,7 +143,7 @@ class BulletClient:
 
     def _physics_setup(self) -> None:
         # Set the gravity vector.
-        self.setGravity(0, 0, self.config.gravity_constant)
+        self.setGravity(*self.config.gravity)
 
     def _gui_setup(self) -> None:
         if self.mode == ConnectionMode.GUI:
@@ -237,6 +237,8 @@ class BulletClient:
     ) -> int:
         """Loads a URDF file into the physics client."""
         assert scaling > 0.0, "Scaling must be greater than 0."
+
+        # TODO(kevin): Should the mass be scaled if the URDF is scaled?
 
         if pose is None:
             pose = Pose()

@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from dm_robotics.geometry import geometry
 
-from coffee import cameras, client
-from coffee.cameras import camera
-from coffee.manipulators.manipulator import Manipulator, ManipulatorConfig
+from coffee import client, sensors
+from coffee.models.arms.robot_arm import Arm, ArmConfig
+from coffee.sensors import camera
 
 
 def main() -> None:
@@ -17,7 +17,7 @@ def main() -> None:
     bullet_client.load_urdf("plane/plane.urdf")
 
     # Instantiate the manipulator.
-    manipulator_config = ManipulatorConfig(
+    manipulator_config = ArmConfig(
         urdf="robots/universal_robot/ur_description/ur5.urdf",
         joint_resting_configuration=[
             j * np.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.0]
@@ -28,8 +28,8 @@ def main() -> None:
         ik_point_link_name="ee_link",
         fixed_base=True,
     )
-    manipulator = Manipulator.create(
-        manipulator_config=manipulator_config,
+    manipulator = Arm.create(
+        arm_config=manipulator_config,
         pb_client=bullet_client,
     )
 
@@ -48,7 +48,7 @@ def main() -> None:
     )
     print("view matrix: ", cam_pose.as_view_matrix())
 
-    cam = cameras.RelativeToCamera(bullet_client, camera_params, cam_pose)
+    cam = sensors.RelativeToCamera(bullet_client, camera_params, cam_pose)
 
     plt.imshow(cam.render().color)
     plt.show()

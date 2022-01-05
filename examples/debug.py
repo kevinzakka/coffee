@@ -6,7 +6,7 @@ import numpy as np
 from dm_robotics.geometry import geometry, pose_distribution
 
 from coffee import client
-from coffee.manipulators.manipulator import Manipulator, ManipulatorConfig
+from coffee.arms.manipulator import Manipulator, ManipulatorConfig
 
 _HOMEJ = [j * math.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.0]]
 _CUBE_THICKNESS = 0.045
@@ -48,6 +48,7 @@ def main() -> None:
         mode=client.ConnectionMode.GUI,
         config=client.ClientConfig(realtime=True, render_shadows=False),
     )
+    bullet_client.load_urdf("plane/plane.urdf")
 
     # Instantiate the manipulator.
     manipulator_config = ManipulatorConfig(

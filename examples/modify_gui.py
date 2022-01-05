@@ -1,7 +1,6 @@
 """An example of how to modify the PyBullet GUI."""
 
 import dataclasses
-import time
 from typing import Optional, Tuple
 
 import dcargs
@@ -22,17 +21,8 @@ def main(args: GuiArgs) -> None:
         mode=client.ConnectionMode.GUI,
         config=client.ClientConfig(**dataclasses.asdict(args)),
     )
-
-    bullet_client.load_urdf("plane/plane.urdf")
-
-    try:
-        while True:
-            bullet_client.stepSimulation()
-            time.sleep(0.1)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        bullet_client.disconnect()
+    bullet_client.infinite_step()
+    bullet_client.disconnect()
 
 
 if __name__ == "__main__":
