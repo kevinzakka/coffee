@@ -45,19 +45,13 @@ class IKSolver:
     joint_damping: float = 0.0
     """The damping coefficient used to stabilize the IK solution."""
 
-    # Initialized in __post_init__.
-    _nullspace_joint_position_reference: Optional[np.ndarray] = dataclasses.field(
-        init=False
-    )
+    nullspace_joint_position_reference: Optional[np.ndarray] = None
+    """"""
 
     def __post_init__(self) -> None:
-        if self.joints.joint_resting_configuration is None:
-            self._nullspace_joint_position_reference = 0.5 * np.sum(
+        if self.nullspace_joint_position_reference is None:
+            self.nullspace_joint_position_reference = 0.5 * np.sum(
                 self.joints.joints_range, axis=1
-            )
-        else:
-            self._nullspace_joint_position_reference = (
-                self.joints.joint_resting_configuration
             )
 
         # Dirty hack to get around pybullet's lack of support for computing FK given a
@@ -69,11 +63,7 @@ class IKSolver:
         )
         manipulator_kwargs = self.pb_client._body_cache[self.joints.body_id]
         shadow_body_id = self._shadow_client.load_urdf(**manipulator_kwargs)
-        self._shadow_joints = Joints.from_body_id(
-            shadow_body_id,
-            self._shadow_client,
-            self.joints.joint_resting_configuration,
-        )
+        self._shadow_joints = Joints.from_body_id(shadow_body_id, self._shadow_client)
 
     def solve(
         self,
@@ -132,7 +122,7 @@ class IKSolver:
                 length.
         """
         if nullspace_reference is None:
-            nullspace_reference = self._nullspace_joint_position_reference
+            nullspace_reference = self.nullspace_joint_position_reference
         else:
             if len(nullspace_reference) != self.joints.dof:
                 raise ValueError("nullspace_reference has an invalid length.")

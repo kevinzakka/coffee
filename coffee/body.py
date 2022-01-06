@@ -14,36 +14,23 @@ from coffee.utils import geometry_utils
 
 
 class Body(metaclass=abc.ABCMeta):
-    """Abstract base class for a body.
-
-    Subclasses must implement the `_build` method.
-    """
-
-    def __init__(self, pb_client: BulletClient, *args, **kwargs) -> None:
-        """Body constructor.
-
-        Subclasses should not override this method. Instead, they should implement a
-        `_build` method.
-
-        Args:
-            pb_client: The BulletClient instance.
-            *args: Positional arguments to pass to the `_build` method.
-            **kwargs: Keyword arguments to pass to the `_build` method.
-        """
-        self._pb_client = pb_client
-
-        self._body_id = self._build(*args, **kwargs)
-        if self._body_id < 0:
-            raise RuntimeError("Failed to create entity.")
-
-        self._joints = Joints.from_body_id(self._body_id, self._pb_client)
+    """Abstract base class for a body."""
 
     @abc.abstractmethod
-    def _build(self, *args, **kwargs) -> int:
-        """Body initialization method to be overridden by subclasses.
+    def __init__(self, body_id: int, pb_client: BulletClient) -> None:
+        """Body constructor.
 
-        Must return the unique body id returned by the bullet client.
+        Args:
+            body_id: The unique ID of the body.
+            pb_client: The BulletClient instance.
         """
+        if body_id < 0:
+            raise ValueError("Body ID must be non-negative.")
+
+        self._body_id = body_id
+        self._pb_client = pb_client
+
+        self._joints = Joints.from_body_id(body_id=body_id, pb_client=pb_client)
 
     # Accessors.
 
@@ -62,7 +49,6 @@ class Body(metaclass=abc.ABCMeta):
     # Methods.
 
     def get_pose(self) -> geometry.Pose:
-        """Gets the pose of the root link of the body in world coordinates."""
         position, quaternion = self.pb_client.getBasePositionAndOrientation(
             self.body_id
         )
@@ -74,16 +60,6 @@ class Body(metaclass=abc.ABCMeta):
     def set_pose(
         self, position: Optional[Array] = None, quaternion: Optional[Array] = None
     ) -> None:
-        """Sets the pose of the root link of the body in world coordinates.
-
-        Note: This method overrides the effect of all simulation and the linear and
-        angular velocities of the body are set to zero.
-
-        Args:
-            position (optional): The desired position of the body in world coordinates.
-            quaternion (optional): The desired orientation of the body in world
-                coordinates.
-        """
         current_pose = self.get_pose()
 
         if position is None:
@@ -103,18 +79,6 @@ class Body(metaclass=abc.ABCMeta):
         quaternion: Optional[Array] = None,
         rotate_velocity: bool = False,
     ) -> None:
-        """Shifts the pose of the root link of the body from its current pose.
-
-        The specified position is added to the current position and the specified
-        quaternion is premultiplied to the current quaternion.
-
-        Args:
-            position (optional): The desired delta in position.
-            quaternion (optional): Quaternion expressing the desired delta in rotation.
-            rotate_velocity: Whether to shift the current linear velocity. This will
-                rotate the current linear velocity, which is expressed relative to the
-                world frame.
-        """
         current_pose = self.get_pose()
         current_velocity = self.get_velocity()[0]
         new_position, new_quaternion = None, None
@@ -132,19 +96,12 @@ class Body(metaclass=abc.ABCMeta):
             self.set_velocity(linear=new_velocity)
 
     def get_velocity(self) -> Tuple[Array, Array]:
-        """Gets the linear and angular velocity of this body."""
         linear_velocity, angular_velocity = self.pb_client.getBaseVelocity(self.body_id)
         return np.asarray(linear_velocity), np.asarray(angular_velocity)
 
     def set_velocity(
         self, linear: Optional[Array] = None, angular: Optional[Array] = None
     ) -> None:
-        """Sets the linear and angular velocity of this body.
-
-        Args:
-            linear (optional): The desired linear velocity of the body.
-            angular (optional): The desired angular velocity of the body.
-        """
         if linear is not None:
             assert len(np.asarray(linear)) == 3
             linear = np.asarray(linear).tolist()
@@ -159,11 +116,6 @@ class Body(metaclass=abc.ABCMeta):
         )
 
     def configure_joints(self, position: Array) -> None:
-        """Configures the joint positions of this body.
-
-        Args:
-            position: The desired position of the body's joints.
-        """
         position = np.asarray(position)
         assert len(position) == self.joints.dof
 
@@ -177,15 +129,13 @@ class Body(metaclass=abc.ABCMeta):
 
 
 class NamedBody(Body):
-    """Base class for named bodies.
+    """A `Body` with a unique name."""
 
-    A named body is a body with a unique name.
-    """
+    @abc.abstractmethod
+    def __init__(self, body_id: int, name: str, pb_client: BulletClient) -> None:
+        super().__init__(body_id=body_id, pb_client=pb_client)
 
-    def __init__(self, name: str, pb_client: BulletClient, *args, **kwargs) -> None:
         self._name = name
-
-        super().__init__(pb_client, *args, **kwargs)
 
     @property
     def name(self) -> str:

@@ -1,21 +1,20 @@
 from typing import Tuple
 
 from coffee import prop
+from coffee.client import BulletClient
 from coffee.models.props import constants as consts
 
 
 class Cylinder(prop.TemplatedProp):
-    def _build(
+    def __init__(
         self,
+        pb_client: BulletClient,
+        name: str = "cylinder",
         radius: float = consts._CYLINDER_RADIUS,
         length: float = consts._CYLINDER_LENGTH,
         mass: float = consts._CYLINDER_MASS,
         color: Tuple[float, float, float, float] = consts._CYLINDER_COLOR,
-        *args,
-        **kwargs,
-    ) -> int:
-        del args, kwargs
-
+    ) -> None:
         replace_dict = {
             "RADIUS": radius,
             "LENGTH": length,
@@ -30,4 +29,6 @@ class Cylinder(prop.TemplatedProp):
         }
         filename = consts._PROP_ROOT / "cylinder" / "cylinder-template.urdf"
         with self._fill_template(filename, replace_dict) as urdf:
-            return self.pb_client.load_urdf(urdf)
+            body_id = pb_client.load_urdf(urdf)
+
+        super().__init__(name=name, body_id=body_id, pb_client=pb_client)

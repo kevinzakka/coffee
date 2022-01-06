@@ -7,7 +7,6 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 
 from coffee.client import BulletClient
-from coffee.hints import Array
 
 
 class JointType(enum.Enum):
@@ -101,14 +100,12 @@ class Joints:
         joints_info:
         controllable_joints:
         non_controllable_joints:
-        joint_resting_configuration:
     """
 
     body_id: int
     joints_info: Tuple[JointInfo, ...]
     controllable_joints: Tuple[int, ...]
     non_controllable_joints: Tuple[int, ...]
-    joint_resting_configuration: Optional[np.ndarray]
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(bodyid={self.body_id}, dof={self.dof})"
@@ -116,11 +113,7 @@ class Joints:
     # Factory methods.
 
     @staticmethod
-    def from_body_id(
-        body_id: int,
-        pb_client: BulletClient,
-        joint_resting_configuration: Optional[Array] = None,
-    ) -> Joints:
+    def from_body_id(body_id: int, pb_client: BulletClient) -> Joints:
         controllable_joints = []
         non_controllable_joints = []
         joints_info = []
@@ -132,19 +125,11 @@ class Joints:
                 non_controllable_joints.append(joint_info.joint_index)
             joints_info.append(joint_info)
 
-        if joint_resting_configuration is not None:
-            if len(joint_resting_configuration) != len(controllable_joints):
-                raise ValueError(
-                    f"Resting configuration must have {len(controllable_joints)} elements."
-                )
-            joint_resting_configuration = np.array(joint_resting_configuration)
-
         return Joints(
             body_id=body_id,
             joints_info=tuple(joints_info),
             controllable_joints=tuple(controllable_joints),
             non_controllable_joints=tuple(non_controllable_joints),
-            joint_resting_configuration=joint_resting_configuration,
         )
 
     # Accessors.

@@ -1,16 +1,15 @@
 from coffee import prop
+from coffee.client import BulletClient
 from coffee.models.props import constants as consts
 
 
 class Cup(prop.TemplatedProp):
-    def _build(
+    def __init__(
         self,
+        pb_client: BulletClient,
+        name: str = "cup",
         scale: float = consts._CUP_SCALE,
-        *args,
-        **kwargs,
-    ) -> int:
-        del args, kwargs
-
+    ) -> None:
         replace_dict = {
             "MASS": scale * consts._CUP_SCALE,
             "SX": scale * consts._CUP_BASE_SX,
@@ -19,4 +18,6 @@ class Cup(prop.TemplatedProp):
         }
         filename = consts._PROP_ROOT / "cup" / "cup-template.urdf"
         with self._fill_template(filename, replace_dict) as urdf:
-            return self.pb_client.load_urdf(urdf)
+            body_id = pb_client.load_urdf(urdf)
+
+        super().__init__(name=name, body_id=body_id, pb_client=pb_client)
