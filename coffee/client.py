@@ -226,8 +226,6 @@ class BulletClient:
         yield
         self.configureDebugVisualizer(self.COV_ENABLE_RENDERING, 1)
 
-    # Convenience methods.
-
     def load_urdf(
         self,
         filename: str,
@@ -237,8 +235,6 @@ class BulletClient:
     ) -> int:
         """Loads a URDF file into the physics client."""
         assert scaling > 0.0, "Scaling must be greater than 0."
-
-        # TODO(kevin): Should the mass be scaled if the URDF is scaled?
 
         if pose is None:
             pose = Pose()
@@ -253,9 +249,6 @@ class BulletClient:
             **kwargs,
         )
 
-        if body_id < 0:
-            raise Exception("Could not load URDF file {filename}")
-
         # Cache.
         self._body_cache[body_id] = {
             "filename": filename,
@@ -265,48 +258,6 @@ class BulletClient:
         }
 
         return body_id
-
-    def reset_body_state(
-        self,
-        body_id: int,
-        pose: Pose,
-        linear_velocity: Optional[np.ndarray] = None,
-        angular_velocity: Optional[np.ndarray] = None,
-    ) -> None:
-        # Reset base position and orientation.
-        self.resetBasePositionAndOrientation(
-            bodyUniqueId=body_id,
-            posObj=pose.position,
-            ornObj=geometry_utils.as_quaternion_xyzw(pose.quaternion),
-        )
-
-        # Reset linear and angular velocities.
-        if linear_velocity is not None:
-            linear_velocity = linear_velocity.tolist()
-        if angular_velocity is not None:
-            angular_velocity = angular_velocity.tolist()
-        self.resetBaseVelocity(
-            objectUniqueId=body_id,
-            linearVelocity=linear_velocity,
-            angularVelocity=angular_velocity,
-        )
-
-    def get_body_state(self, body_id) -> BodyState:
-        position, quaternion_xyzw = self.getBasePositionAndOrientation(body_id)
-        pose = Pose(
-            position=position,
-            quaternion=geometry_utils.as_quaternion_wxyz(quaternion_xyzw),
-        )
-        linear_velocity, angular_velocity = self.getBaseVelocity(body_id)
-        return BodyState(
-            pose=pose,
-            linear_velocity=np.asarray(linear_velocity),
-            angular_velocity=np.asarray(angular_velocity),
-        )
-
-    def remove_body(self, body_id: int) -> None:
-        """Removes a body from the physics client."""
-        self.removeBody(bodyUniqueId=body_id)
 
     # Properties.
 

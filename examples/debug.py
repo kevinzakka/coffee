@@ -6,7 +6,7 @@ import numpy as np
 from dm_robotics.geometry import geometry, pose_distribution
 
 from coffee import client
-from coffee.models.arms.robot_arm import Arm, ArmConfig
+from coffee.models.arms.old_robot_arm import Arm, ArmConfig
 
 _HOMEJ = [j * math.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.0]]
 _CUBE_THICKNESS = 0.045

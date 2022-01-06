@@ -3,7 +3,7 @@ import numpy as np
 from dm_robotics.geometry import geometry
 
 from coffee import client, sensors
-from coffee.models.arms.robot_arm import Arm, ArmConfig
+from coffee.models.arms.old_robot_arm import Arm, ArmConfig
 from coffee.sensors import camera
 
 
