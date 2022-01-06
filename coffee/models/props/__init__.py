@@ -1,3 +1,13 @@
-from coffee import _SRC_ROOT
+from coffee.models.props.ball import Ball
+from coffee.models.props.cube import Cube
+from coffee.models.props.cup import Cup
+from coffee.models.props.cylinder import Cylinder
+from coffee.models.props.tote import Tote
 
-_PROP_ROOT = _SRC_ROOT / "models" / "props" / "assets"
+__all__ = [
+    "Ball",
+    "Cube",
+    "Cup",
+    "Cylinder",
+    "Tote",
+]

@@ -1,3 +1,5 @@
+"""Base class for props."""
+
 import abc
 import contextlib
 import pathlib
@@ -41,7 +43,7 @@ class Prop(abc.ABC):
 
     @abc.abstractmethod
     def _build(self, pb_client: BulletClient) -> None:
-        """Entity initialization method to be overridden by subclasses."""
+        """Prop initialization method to be overridden by subclasses."""
         ...
 
     @property
@@ -71,6 +73,7 @@ class Prop(abc.ABC):
         if self.body_id < 0:
             raise RuntimeError("You must first build the prop.")
 
+        # TODO(kevin): Implement this method.
         print("Disabling collisions is not currently implemented.")
 
 
@@ -101,15 +104,11 @@ class TemplatedProp(Prop):
         data = data.format(**replace_dict)
 
         # Write the filled URDF to a temporary file.
-        tf = tempfile.NamedTemporaryFile(
+        with tempfile.NamedTemporaryFile(
             suffix=".urdf",
             dir=template_path.parent,
             delete=True,
-        )
-        tf.write(data.encode("utf-8"))
-        tf.flush()
-
-        try:
+        ) as tf:
+            tf.write(data.encode("utf-8"))
+            tf.flush()
             yield tf.name
-        finally:
-            tf.close()

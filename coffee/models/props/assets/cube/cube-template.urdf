@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<robot name="cube">
+  <link name="baseLink">
+    <contact>
+      <lateral_friction value="1.0"/>
+      <rolling_friction value="0.0001"/>
+      <inertia_scaling value="3.0"/>
+    </contact>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+       <mass value="{MASS}"/>
+       <inertia ixx="{IXX}" ixy="0" ixz="0" iyy="{IYY}" iyz="0" izz="{IZZ}"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+         <box size="{DEPTH} {WIDTH} {HEIGHT}"/>
+      </geometry>
+      <material name="color">
+        <color rgba="{R} {G} {B} {A}"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="{DEPTH} {WIDTH} {HEIGHT}"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
+

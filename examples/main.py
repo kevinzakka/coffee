@@ -1,20 +1,21 @@
 from coffee import client
-from coffee.models.props import block
+from coffee.models import props
 
 
 def main(bullet_client: client.BulletClient) -> None:
-    # from ipdb import set_trace; set_trace()
-    blk = block.Block(
-        name="block",
-        width=0.1,
-        height=0.1,
-        depth=0.1,
-        color=(0.3412, 0.3490, 1, 1),
-    )
-    blk.build(bullet_client)
+    with bullet_client.disable_rendering():
+        p1 = props.Tote("tote")
+        p1.build(bullet_client)
+        p2 = props.Cube("block")
+        p2.build(bullet_client)
+        p2.set_pose(bullet_client, [0, 0, 0.1])
+        p3 = props.Cylinder("cylinder", color=(0.3412, 0.3490, 1, 1))
+        p3.build(bullet_client)
+        p3.set_pose(bullet_client, [0.1, 0.0, 0.1])
+        p4 = props.Cup("cup")
+        p4.build(bullet_client)
+        p4.set_pose(bullet_client, [0.1, 0.1, 0.1])
     bullet_client.infinite_step()
-
-    # block.set_pose(bullet_client, position=(0.5, -0.1, 0.5), quaternion=(1, 0, 0, 0))
 
 
 if __name__ == "__main__":
