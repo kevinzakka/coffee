@@ -156,6 +156,13 @@ class NamedBody(Body):
 
     @abc.abstractmethod
     def __init__(self, body_id: int, name: str, pb_client: BulletClient) -> None:
+        """NamedBody constructor.
+
+        Args:
+            body_id: The unique ID of the body.
+            name: The unique name of the body.
+            pb_client: The BulletClient instance.
+        """
         super().__init__(body_id=body_id, pb_client=pb_client)
 
         self._name = name

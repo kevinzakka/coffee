@@ -3,9 +3,25 @@
 import itertools
 from typing import Any, Dict, Iterable
 
+import numpy as np
 from absl.testing import absltest, parameterized
 
 from coffee.client import BulletClient, ClientConfig, ConnectionMode
+
+# Special rotations for unit testing, expressed as quaternions.
+_NO_ROTATION = np.array([1.0, 0.0, 0.0, 0.0])
+_NINETY_DEGREES_ABOUT_X = np.array([np.cos(np.pi / 4), np.sin(np.pi / 4), 0.0, 0.0])
+_NINETY_DEGREES_ABOUT_Y = np.array([np.cos(np.pi / 4), 0.0, np.sin(np.pi / 4), 0.0])
+_NINETY_DEGREES_ABOUT_Z = np.array([np.cos(np.pi / 4), 0.0, 0.0, np.sin(np.pi / 4)])
+_FORTYFIVE_DEGREES_ABOUT_X = np.array([np.cos(np.pi / 8), np.sin(np.pi / 8), 0.0, 0.0])
+_FORTYFIVE_DEGREES_ABOUT_Y = np.array([np.cos(np.pi / 8), 0.0, np.sin(np.pi / 8), 0.0])
+_FORTYFIVE_DEGREES_ABOUT_Z = np.array([np.cos(np.pi / 8), 0.0, 0.0, np.sin(np.pi / 8)])
+
+# Special constants.
+_PI = np.pi
+_TWO_PI = 2 * np.pi
+_HALF_PI = np.pi / 2
+_INF = np.inf
 
 
 class BulletMultiDirectTestCase(absltest.TestCase):

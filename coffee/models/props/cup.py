@@ -8,10 +8,11 @@ class Cup(prop.TemplatedProp):
         self,
         pb_client: BulletClient,
         name: str = "cup",
+        mass: float = consts._CUP_BASE_MASS,
         scale: float = consts._CUP_SCALE,
     ) -> None:
         replace_dict = {
-            "MASS": scale * consts._CUP_SCALE,
+            "MASS": scale * mass,
             "SX": scale * consts._CUP_BASE_SX,
             "SY": scale * consts._CUP_BASE_SY,
             "SZ": scale * consts._CUP_BASE_SZ,

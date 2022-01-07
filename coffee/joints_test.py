@@ -4,10 +4,7 @@ import numpy as np
 from absl.testing import absltest
 
 from coffee.joints import Joints
-from coffee.utils.testing_utils import BulletMultiDirectTestCase
-
-_PI = np.pi
-_TWO_PI = 2 * np.pi
+from coffee.utils.testing_utils import _PI, _TWO_PI, BulletMultiDirectTestCase
 
 
 class JointsTest(BulletMultiDirectTestCase):

@@ -9,9 +9,10 @@ class Tote(prop.TemplatedProp):
         pb_client: BulletClient,
         name: str = "tote",
         scale: float = consts._TOTE_SCALE,
+        mass: float = consts._TOTE_BASE_MASS,
     ) -> None:
         replace_dict = {
-            "MASS": scale * consts._TOTE_BASE_MASS,
+            "MASS": scale * mass,
             "SX": scale * consts._TOTE_BASE_SX,
             "SY": scale * consts._TOTE_BASE_SY,
             "SZ": scale * consts._TOTE_BASE_SZ,

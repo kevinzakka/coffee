@@ -148,12 +148,11 @@ class BulletClient:
     def _gui_setup(self) -> None:
         if self.mode == ConnectionMode.GUI:
             # Move the default camera closer to the scene.
-            target = self.getDebugVisualizerCamera()[11]
             self.resetDebugVisualizerCamera(
                 cameraDistance=1.5,
                 cameraYaw=90,
                 cameraPitch=-25,
-                cameraTargetPosition=target,
+                cameraTargetPosition=(0.0, 0.0, 0.0),
             )
             # Clear the GUI panels.
             self.configureDebugVisualizer(self.COV_ENABLE_GUI, False)
@@ -197,7 +196,6 @@ class BulletClient:
         # infinite recursion.
         try:
             p.disconnect(physicsClientId=self.client_id)
-            # print(f"(id:{self.client_id}) successfully disconnected.")
             self.client_id = -1
         except p.error as e:
             print(f"(id:{self.client_id}) {e}")

@@ -10,28 +10,21 @@ from coffee.hints import Array
 from coffee.utils import testing_utils
 from coffee.utils.geometry_utils import quaternion_equal
 
-# Quaternions for special rotations.
-_NO_ROTATION = (1, 0, 0, 0)
-_NINETY_DEGREES_ABOUT_X = np.array([np.cos(np.pi / 4), np.sin(np.pi / 4), 0.0, 0.0])
-_NINETY_DEGREES_ABOUT_Y = np.array([np.cos(np.pi / 4), 0.0, np.sin(np.pi / 4), 0.0])
-_NINETY_DEGREES_ABOUT_Z = np.array([np.cos(np.pi / 4), 0.0, 0.0, np.sin(np.pi / 4)])
-_FORTYFIVE_DEGREES_ABOUT_X = np.array([np.cos(np.pi / 8), np.sin(np.pi / 8), 0.0, 0.0])
-
 # Triplets of starting rotation, rotation by, and final rotation.
 _TEST_ROTATIONS = [
     (
         None,
-        _NO_ROTATION,
-        _NO_ROTATION,
+        testing_utils._NO_ROTATION,
+        testing_utils._NO_ROTATION,
     ),
     (
-        _NO_ROTATION,
-        _NINETY_DEGREES_ABOUT_Z,
-        _NINETY_DEGREES_ABOUT_Z,
+        testing_utils._NO_ROTATION,
+        testing_utils._NINETY_DEGREES_ABOUT_Z,
+        testing_utils._NINETY_DEGREES_ABOUT_Z,
     ),
     (
-        _FORTYFIVE_DEGREES_ABOUT_X,
-        _NINETY_DEGREES_ABOUT_Y,
+        testing_utils._FORTYFIVE_DEGREES_ABOUT_X,
+        testing_utils._NINETY_DEGREES_ABOUT_Y,
         np.array([0.65328, 0.2706, 0.65328, -0.2706]),
     ),
 ]
@@ -48,7 +41,18 @@ class BodyTest(testing_utils.BulletMultiDirectParameterizedTestCase):
     def setUp(self) -> None:
         super().setUp()
 
-        body_id = self.client.load_urdf("sphere.urdf", useFixedBase=False)
+        # Programmatically create a sphere of radius 0.1. This is one of the simplest
+        # bodies that can be used for testing.
+        collision_args = {"shapeType": self.client.GEOM_SPHERE}
+        visual_args = {"shapeType": self.client.GEOM_SPHERE}
+        collision_args["radius"] = 0.1
+        visual_args["radius"] = 0.1
+        v_id = self.client.createVisualShape(**visual_args)
+        multi_body_kwargs = dict(baseMass=0.1, baseVisualShapeIndex=v_id)
+        c_id = self.client.createCollisionShape(**collision_args)
+        multi_body_kwargs["baseCollisionShapeIndex"] = c_id
+        body_id = self.client.createMultiBody(**multi_body_kwargs)
+
         self.body = _TestBody(body_id=body_id, pb_client=self.client)
 
     def test_raises_body_id_negative(self) -> None:
@@ -59,14 +63,18 @@ class BodyTest(testing_utils.BulletMultiDirectParameterizedTestCase):
     @parameterized.parameters(
         *testing_utils.param_product(
             position=[None, [1.0, 0.0, -1.0]],
-            quaternion=[None, _FORTYFIVE_DEGREES_ABOUT_X, _NINETY_DEGREES_ABOUT_Z],
+            quaternion=[
+                None,
+                testing_utils._FORTYFIVE_DEGREES_ABOUT_X,
+                testing_utils._NINETY_DEGREES_ABOUT_Z,
+            ],
         )
     )
     def test_set_get_pose(
         self, position: Optional[Array], quaternion: Optional[Array]
     ) -> None:
         if quaternion is None:
-            ground_truth_quaternion = _NO_ROTATION
+            ground_truth_quaternion = testing_utils._NO_ROTATION
         else:
             ground_truth_quaternion = quaternion  # type: ignore
         if position is None:
@@ -143,7 +151,8 @@ class BodyTest(testing_utils.BulletMultiDirectParameterizedTestCase):
 
         # Rotate the body around the z-axis.
         self.body.shift_pose(
-            quaternion=_NINETY_DEGREES_ABOUT_Z, rotate_velocity=rotate_velocity
+            quaternion=testing_utils._NINETY_DEGREES_ABOUT_Z,
+            rotate_velocity=rotate_velocity,
         )
 
         self.client.step()

@@ -31,3 +31,8 @@ def quaternion_equal(actual: Array, expected: Array) -> bool:
     actual = np.asarray(actual)
     expected = np.asarray(expected)
     return np.allclose(actual, expected) or np.allclose(actual, expected * -1)
+
+
+def wrap_angle(angle: float) -> float:
+    """Wrap an angle to [-pi, pi] range."""
+    return (angle + np.pi) % (2 * np.pi) - np.pi

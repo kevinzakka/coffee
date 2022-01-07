@@ -1,24 +1,24 @@
-# import enum
-# import math
+import pathlib
 
-# from coffee import _SRC_ROOT
+import numpy as np
 
+from coffee import _SRC_ROOT
 
-# # Available actuation methods available for the UR5.
-# class Actuation(enum.Enum):
-#     POSITION = 0
-#     """Position control."""
+# Path to the URDF file.
+UR5_URDF: pathlib.Path = (
+    _SRC_ROOT / "models" / "vendor" / "universal_robot" / "ur_description" / "ur5.urdf"
+)
 
+# Resting joint configuration.
+JOINT_RESTING_CONFIGURATION: np.ndarray = np.array(
+    [j * np.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.0]]
+)
 
-# # Degrees of freedom. This is going to be checked against what is parsed from the
-# # URDF file.
-# DOF = 6
+# Last link name.
+IK_POINT_LINK_NAME: str = "ee_link"
 
-# # Home joint configuration.
-# HOMEJ = [j * math.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.0]]
+# Fixed base.
+FIXED_BASE: bool = True
 
-# UR5_URDF = _SRC_ROOT / "models" / "vendor" / "universal_robot" / "ur5.urdf"
-
-
-# DEFAULT_Kp: float = 3e-2
-# DEFAULT_Kv: float = 0.0
+# Max joint position error.
+MAX_JOINT_POSITION_ERROR: float = 1e-4

@@ -1,34 +1,37 @@
-# import numpy as np
+from typing import Optional
 
-# from coffee.client import BulletClient
-# from coffee.models.robot_arms import robot_arm
-# from coffee.models.robot_arms import ur5_constants as consts
+from coffee.client import BulletClient
+from coffee.hints import Array
+from coffee.models.robot_arms import robot_arm
+from coffee.models.robot_arms import ur5_constants as consts
 
 
-# class UR5(robot_arm.RobotArm):
-#     """A UR5 arm from Universal Robots."""
+class UR5(robot_arm.RobotArm):
+    """A UR5 arm from Universal Robots."""
 
-#     def _build(
-#         self,
-#         fix_base: bool = True,
-#         *args,
-#         **kwargs,
-#     ) -> int:
-#         del args, kwargs
+    def __init__(
+        self,
+        pb_client: BulletClient,
+        name: str = "ur5",
+        joint_resting_configuration: Array = consts.JOINT_RESTING_CONFIGURATION,
+        ik_point_link_name: Optional[str] = consts.IK_POINT_LINK_NAME,
+        fixed_base: bool = consts.FIXED_BASE,
+        max_joint_position_error: float = consts.MAX_JOINT_POSITION_ERROR,
+    ) -> None:
+        flags = pb_client.URDF_ENABLE_CACHED_GRAPHICS_SHAPES
 
-#         flags = self.pb_client.URDF_ENABLE_CACHED_GRAPHICS_SHAPES
+        body_id = pb_client.load_urdf(
+            str(consts.UR5_URDF),
+            useFixedBase=fixed_base,
+            flags=flags,
+        )
 
-#         body_id = self.pb_client.load_urdf(
-#             str(consts.UR5_URDF),
-#             useFixedBase=fix_base,
-#             flags=flags,
-#         )
-
-#         return body_id
-
-#     def set_joint_angles(
-#         self,
-#         pb_client: BulletClient,
-#         joint_angles: np.ndarray,
-#     ) -> None:
-#         """Sets the joints of the robot to a given configuration."""
+        super().__init__(
+            name=name,
+            body_id=body_id,
+            pb_client=pb_client,
+            joint_resting_configuration=joint_resting_configuration,
+            ik_point_link_name=ik_point_link_name,
+            fixed_base=fixed_base,
+            max_joint_position_error=max_joint_position_error,
+        )

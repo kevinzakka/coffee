@@ -55,6 +55,8 @@ class SimpleIKSolver:
                     a_min=self.joints.joints_lower_limit,
                     a_max=self.joints.joints_upper_limit,
                 )
+
+                # TODO(kevin)L Canonicalise to [0, 2*pi].
         except p.error:
             qpos = None
         return qpos
