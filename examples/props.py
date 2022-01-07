@@ -4,7 +4,7 @@ from coffee.models import props
 
 def main(bullet_client: client.BulletClient) -> None:
     with bullet_client.disable_rendering():
-        props.Tote(bullet_client)
+        p1 = props.Tote(bullet_client)
         p2 = props.Cube(bullet_client)
         p2.set_pose([0, 0, 0.1])
         p3 = props.Cylinder(bullet_client, color=(0.3412, 0.3490, 1, 1))

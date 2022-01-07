@@ -1,5 +1,8 @@
 """Classes to make testing with pybullet easier."""
 
+import itertools
+from typing import Any, Dict, Iterable
+
 from absl.testing import absltest, parameterized
 
 from coffee.client import BulletClient, ClientConfig, ConnectionMode
@@ -33,3 +36,10 @@ class BulletMultiDirectParameterizedTestCase(parameterized.TestCase):
 
     def tearDown(self) -> None:
         del self.client
+
+
+def param_product(**param_lists) -> Iterable[Dict[Any, Any]]:
+    """Returns the cartesian product over the values of the given parameters."""
+    keys, values = zip(*param_lists.items())
+    for combination in itertools.product(*values):
+        yield dict(zip(keys, combination))

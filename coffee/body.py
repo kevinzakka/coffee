@@ -4,7 +4,6 @@ import abc
 from typing import Optional, Tuple
 
 import numpy as np
-from dm_robotics.geometry import geometry
 from dm_robotics.transformations import transformations as tr
 
 from coffee.client import BulletClient
@@ -48,30 +47,36 @@ class Body(metaclass=abc.ABCMeta):
 
     # Methods.
 
-    def get_pose(self) -> geometry.Pose:
+    def get_pose(self) -> Tuple[np.ndarray, np.ndarray]:
         position, quaternion = self.pb_client.getBasePositionAndOrientation(
             self.body_id
         )
-        return geometry.Pose(
-            position=position,
-            quaternion=geometry_utils.as_quaternion_wxyz(quaternion),
-        )
+        position = np.asarray(position)
+        quaternion = geometry_utils.as_quaternion_wxyz(quaternion)
+        return position, quaternion
 
     def set_pose(
         self, position: Optional[Array] = None, quaternion: Optional[Array] = None
     ) -> None:
-        current_pose = self.get_pose()
+        """Set the position and orientation of the body root in the world frame."""
+        current_position, current_quaternion = self.get_pose()
+        current_linear_vel, current_angular_vel = self.get_velocity()
 
         if position is None:
-            position = current_pose.position
+            position = current_position
         if quaternion is None:
-            quaternion = current_pose.quaternion
+            quaternion = current_quaternion
+
+        quaternion_xyzw = geometry_utils.as_quaternion_xyzw(quaternion)
 
         self.pb_client.resetBasePositionAndOrientation(
             bodyUniqueId=self.body_id,
             posObj=position,
-            ornObj=geometry_utils.as_quaternion_xyzw(quaternion),
+            ornObj=quaternion_xyzw,
         )
+
+        # Restore linear and angular velocities.
+        self.set_velocity(current_linear_vel, current_angular_vel)
 
     def shift_pose(
         self,
@@ -79,41 +84,59 @@ class Body(metaclass=abc.ABCMeta):
         quaternion: Optional[Array] = None,
         rotate_velocity: bool = False,
     ) -> None:
-        current_pose = self.get_pose()
-        current_velocity = self.get_velocity()[0]
+        """Shifts the position and/or the orientation of the body from its current pose.
+
+        This is a convenience function that wraps `set_pose`. The specified position is
+        added to the current body position, and the specified quaternion is pre
+        multiplied to the current body quaternion.
+
+        If `rotate_velocity` is True, the current linear velocity of the body will
+        be rotated relative to the world frame.
+        """
+        current_position, current_quaternion = self.get_pose()
+        current_linear_vel, _ = self.get_velocity()
         new_position, new_quaternion = None, None
 
         if position is not None:
-            assert len(position) == 3
-            new_position = current_pose.position + position
+            new_position = current_position + position
         if quaternion is not None:
-            assert len(quaternion) == 4
             quaternion = np.array(quaternion, dtype=np.float64, copy=False)
-            new_quaternion = tr.quat_mul(quaternion, current_pose.quaternion)
-        self.set_pose(new_position, new_quaternion)
-        if rotate_velocity:
-            new_velocity = tr.quat_rotate(quaternion, current_velocity)
-            self.set_velocity(linear=new_velocity)
+            new_quaternion = tr.quat_mul(quaternion, current_quaternion)
+            if rotate_velocity:
+                # Rotate the linear velocity. The angular velocity is left unchanged, as
+                # it is experessed in the body frame. When rotating the body frame, the
+                # angular velocity already tracks the rotation, but the linear velocity
+                # does not.
+                rotated_velocity = tr.quat_rotate(quaternion, current_linear_vel)
+                self.set_velocity(linear=rotated_velocity)
 
-    def get_velocity(self) -> Tuple[Array, Array]:
+        self.set_pose(new_position, new_quaternion)
+
+    def get_velocity(self) -> Tuple[np.ndarray, np.ndarray]:
         linear_velocity, angular_velocity = self.pb_client.getBaseVelocity(self.body_id)
-        return np.asarray(linear_velocity), np.asarray(angular_velocity)
+        linear_velocity = np.asarray(linear_velocity)
+        angular_velocity = np.asarray(angular_velocity)
+        return linear_velocity, angular_velocity
 
     def set_velocity(
         self, linear: Optional[Array] = None, angular: Optional[Array] = None
     ) -> None:
-        if linear is not None:
-            assert len(np.asarray(linear)) == 3
-            linear = np.asarray(linear).tolist()
-        if angular is not None:
-            assert len(np.asarray(angular)) == 3
-            angular = np.asarray(angular).tolist()
+        current_linear, current_angular = self.get_velocity()
 
-        self.pb_client.resetBaseVelocity(
-            objectUniqueId=self.body_id,
-            linearVelocity=linear,
-            angularVelocity=angular,
-        )
+        if linear is not None:
+            if len(np.asarray(linear)) != 3:
+                raise ValueError("Linear velocity must be a length 3 vector.")
+            linear = np.asarray(linear)
+        else:
+            linear = current_linear
+        if angular is not None:
+            if len(np.asarray(angular)) != 3:
+                raise ValueError("Angular velocity must be a length 3 vector.")
+            angular = np.asarray(angular)
+        else:
+            angular = current_angular
+
+        self.pb_client.resetBaseVelocity(self.body_id, linear, angular)
 
     def configure_joints(self, position: Array) -> None:
         position = np.asarray(position)

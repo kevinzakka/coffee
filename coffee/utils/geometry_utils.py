@@ -2,6 +2,8 @@ from typing import Optional
 
 import numpy as np
 
+from coffee.hints import Array
+
 
 def l2_normalize(
     x: np.ndarray,
@@ -14,11 +16,18 @@ def l2_normalize(
     return x * x_inv_norm
 
 
-def as_quaternion_xyzw(wxyz: np.ndarray) -> np.ndarray:
+def as_quaternion_xyzw(wxyz: Array) -> np.ndarray:
     """Convert a quaternion from WXYZ to XYZW format."""
     return np.roll(wxyz, shift=-1)
 
 
-def as_quaternion_wxyz(xyzw: np.ndarray) -> np.ndarray:
+def as_quaternion_wxyz(xyzw: Array) -> np.ndarray:
     """Convert a quaternion from XYZW to WXYZ format."""
     return np.roll(xyzw, shift=1)
+
+
+def quaternion_equal(actual: Array, expected: Array) -> bool:
+    """Returns True if two quaternions are equal."""
+    actual = np.asarray(actual)
+    expected = np.asarray(expected)
+    return np.allclose(actual, expected) or np.allclose(actual, expected * -1)
