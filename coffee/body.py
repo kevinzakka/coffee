@@ -55,12 +55,16 @@ class Body(metaclass=abc.ABCMeta):
         quaternion = geometry_utils.as_quaternion_wxyz(quaternion)
         return position, quaternion
 
-    def set_pose(
+    def reset_pose(
         self, position: Optional[Array] = None, quaternion: Optional[Array] = None
     ) -> None:
-        """Set the position and orientation of the body root in the world frame."""
+        """Reset the position and orientation of the body root in the world frame.
+
+        This also resets the linear and angular velocities of the body.
+
+        If one of position/orientation is None, it is not reset.
+        """
         current_position, current_quaternion = self.get_pose()
-        current_linear_vel, current_angular_vel = self.get_velocity()
 
         if position is None:
             position = current_position
@@ -75,26 +79,18 @@ class Body(metaclass=abc.ABCMeta):
             ornObj=quaternion_xyzw,
         )
 
-        # Restore linear and angular velocities.
-        self.set_velocity(current_linear_vel, current_angular_vel)
-
     def shift_pose(
         self,
         position: Optional[Array] = None,
         quaternion: Optional[Array] = None,
-        rotate_velocity: bool = False,
     ) -> None:
         """Shifts the position and/or the orientation of the body from its current pose.
 
         This is a convenience function that wraps `set_pose`. The specified position is
         added to the current body position, and the specified quaternion is pre
         multiplied to the current body quaternion.
-
-        If `rotate_velocity` is True, the current linear velocity of the body will
-        be rotated relative to the world frame.
         """
         current_position, current_quaternion = self.get_pose()
-        current_linear_vel, _ = self.get_velocity()
         new_position, new_quaternion = None, None
 
         if position is not None:
@@ -102,15 +98,8 @@ class Body(metaclass=abc.ABCMeta):
         if quaternion is not None:
             quaternion = np.array(quaternion, dtype=np.float64, copy=False)
             new_quaternion = tr.quat_mul(quaternion, current_quaternion)
-            if rotate_velocity:
-                # Rotate the linear velocity. The angular velocity is left unchanged, as
-                # it is experessed in the body frame. When rotating the body frame, the
-                # angular velocity already tracks the rotation, but the linear velocity
-                # does not.
-                rotated_velocity = tr.quat_rotate(quaternion, current_linear_vel)
-                self.set_velocity(linear=rotated_velocity)
 
-        self.set_pose(new_position, new_quaternion)
+        self.reset_pose(new_position, new_quaternion)
 
     def get_velocity(self) -> Tuple[np.ndarray, np.ndarray]:
         linear_velocity, angular_velocity = self.pb_client.getBaseVelocity(self.body_id)
@@ -118,23 +107,25 @@ class Body(metaclass=abc.ABCMeta):
         angular_velocity = np.asarray(angular_velocity)
         return linear_velocity, angular_velocity
 
-    def set_velocity(
+    def reset_velocity(
         self, linear: Optional[Array] = None, angular: Optional[Array] = None
     ) -> None:
-        current_linear, current_angular = self.get_velocity()
+        """Reset the linear and angular velocities of the body.
 
+        If one of the arguments is None, the corresponding velocity is reset to 0.
+        """
         if linear is not None:
             if len(np.asarray(linear)) != 3:
                 raise ValueError("Linear velocity must be a length 3 vector.")
             linear = np.asarray(linear)
         else:
-            linear = current_linear
+            linear = np.zeros(3)
         if angular is not None:
             if len(np.asarray(angular)) != 3:
                 raise ValueError("Angular velocity must be a length 3 vector.")
             angular = np.asarray(angular)
         else:
-            angular = current_angular
+            angular = np.zeros(3)
 
         self.pb_client.resetBaseVelocity(self.body_id, linear, angular)
 

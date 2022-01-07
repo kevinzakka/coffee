@@ -70,7 +70,7 @@ class BodyTest(testing_utils.BulletMultiDirectParameterizedTestCase):
             ],
         )
     )
-    def test_set_get_pose(
+    def test_reset_get_pose(
         self, position: Optional[Array], quaternion: Optional[Array]
     ) -> None:
         if quaternion is None:
@@ -82,7 +82,7 @@ class BodyTest(testing_utils.BulletMultiDirectParameterizedTestCase):
         else:
             ground_truth_position = position  # type: ignore
 
-        self.body.set_pose(position=position, quaternion=quaternion)
+        self.body.reset_pose(position=position, quaternion=quaternion)
 
         actual_position, actual_quaternion = self.body.get_pose()
 
@@ -105,7 +105,7 @@ class BodyTest(testing_utils.BulletMultiDirectParameterizedTestCase):
         original_quaternion, quaternion, expected_quaternion = quaternion_triplet
 
         # Set the original position.
-        self.body.set_pose(position=original_position, quaternion=original_quaternion)
+        self.body.reset_pose(position=original_position, quaternion=original_quaternion)
 
         if position is None:
             ground_truth_position = original_position
@@ -116,7 +116,7 @@ class BodyTest(testing_utils.BulletMultiDirectParameterizedTestCase):
         np.testing.assert_array_equal(actual_position, ground_truth_position)
         self.assertTrue(quaternion_equal(actual_quaternion, expected_quaternion))
 
-    def test_set_pose_preserves_velocity(self) -> None:
+    def test_set_pose_zeros_out_velocity(self) -> None:
         # Check that we start with 0 velocity.
         current_linear, current_angular = self.body.get_velocity()
         np.testing.assert_almost_equal(current_linear, np.zeros(3))
@@ -125,7 +125,7 @@ class BodyTest(testing_utils.BulletMultiDirectParameterizedTestCase):
         # Set random velocities.
         linear_velocity = np.random.uniform(-1.0, 1.0, size=3)
         angular_velocity = np.random.uniform(-1.0, 1.0, size=3)
-        self.body.set_velocity(linear_velocity, angular_velocity)
+        self.body.reset_velocity(linear_velocity, angular_velocity)
 
         # Check that velocities were correctly set.
         current_linear, current_angular = self.body.get_velocity()
@@ -134,68 +134,44 @@ class BodyTest(testing_utils.BulletMultiDirectParameterizedTestCase):
 
         # Set random pose.
         position = np.random.uniform(-1.0, 1.0, size=3)
-        self.body.set_pose(position=position)
+        self.body.reset_pose(position=position)
 
         # Check that velocities were correctly set.
         current_linear, current_angular = self.body.get_velocity()
-        np.testing.assert_almost_equal(current_linear, linear_velocity)
-        np.testing.assert_almost_equal(current_angular, angular_velocity)
+        np.testing.assert_almost_equal(current_linear, np.zeros(3))
+        np.testing.assert_almost_equal(current_angular, np.zeros(3))
 
-    @parameterized.named_parameters(("rotation_off", False), ("rotation_on", True))
-    def test_shift_pose_with_velocity(self, rotate_velocity: bool) -> None:
+    def test_set_velocity_one_arg_zeroes_other(self) -> None:
         # Set the original position.
-        self.body.set_pose(position=[0.0, 0.0, 0.0])
-
-        # Set velocity in y dim.
-        self.body.set_velocity(linear=[0.0, 1.0, 0.0])
-
-        # Rotate the body around the z-axis.
-        self.body.shift_pose(
-            quaternion=testing_utils._NINETY_DEGREES_ABOUT_Z,
-            rotate_velocity=rotate_velocity,
-        )
-
-        self.client.step()
-        current_position, _ = self.body.get_pose()
-
-        if rotate_velocity:
-            # Should not have moved in the y-direction.
-            np.testing.assert_array_almost_equal(current_position[1], 0.0)
-        else:
-            # Should not have moved in the x-direction.
-            np.testing.assert_array_almost_equal(current_position[0], 0.0)
-
-    def test_set_velocity_one_arg_preserves_other(self) -> None:
-        # Set the original position.
-        self.body.set_pose(position=[0.0, 0.0, 0.0])
+        self.body.reset_pose(position=[0.0, 0.0, 0.0])
 
         # Set random linear and angular velocities.
         linear_vel = np.random.uniform(-1.0, 1.0, size=3)
         angular_vel = np.random.uniform(-1.0, 1.0, size=3)
-        self.body.set_velocity(linear=linear_vel, angular=angular_vel)
+        self.body.reset_velocity(linear=linear_vel, angular=angular_vel)
 
         # Set linear to 0.
-        self.body.set_velocity(linear=np.zeros(3))
+        self.body.reset_velocity(linear=np.zeros(3))
         current_linear_vel, current_angular_vel = self.body.get_velocity()
         np.testing.assert_equal(current_linear_vel, np.zeros(3))
-        np.testing.assert_equal(current_angular_vel, angular_vel)
+        np.testing.assert_equal(current_angular_vel, np.zeros(3))
 
         # Again, set random linear and angular velocities.
         linear_vel = np.random.uniform(-1.0, 1.0, size=3)
         angular_vel = np.random.uniform(-1.0, 1.0, size=3)
-        self.body.set_velocity(linear=linear_vel, angular=angular_vel)
+        self.body.reset_velocity(linear=linear_vel, angular=angular_vel)
 
         # Set angular to 0.
-        self.body.set_velocity(angular=np.zeros(3))
+        self.body.reset_velocity(angular=np.zeros(3))
         current_linear_vel, current_angular_vel = self.body.get_velocity()
-        np.testing.assert_equal(current_linear_vel, linear_vel)
+        np.testing.assert_equal(current_linear_vel, np.zeros(3))
         np.testing.assert_equal(current_angular_vel, np.zeros(3))
 
     def test_raises_velocity_wrong_len(self) -> None:
         with self.assertRaises(ValueError):
-            self.body.set_velocity(np.zeros(3), np.zeros(2))
+            self.body.reset_velocity(np.zeros(3), np.zeros(2))
         with self.assertRaises(ValueError):
-            self.body.set_velocity(np.zeros(2), np.zeros(3))
+            self.body.reset_velocity(np.zeros(2), np.zeros(3))
 
     def test_raises_joints_wrong_len(self) -> None:
         with self.assertRaises(AssertionError):
