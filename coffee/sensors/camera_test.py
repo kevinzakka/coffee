@@ -61,7 +61,7 @@ class URDFCameraPoseTest(BulletMultiDirectParameterizedTestCase):
         super().setUp()
 
         self.body_id = self.client.load_urdf(
-            "robots/universal_robot/ur_description/ur5_camera.urdf"
+            "robot_arms/universal_robot/ur5_description/ur5_camera.urdf"
         )
 
     def test_raises_when_invalid_link_name(self) -> None:

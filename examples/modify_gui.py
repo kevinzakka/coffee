@@ -21,6 +21,7 @@ def main(args: GuiArgs) -> None:
         mode=client.ConnectionMode.GUI,
         config=client.ClientConfig(**dataclasses.asdict(args)),
     )
+    bullet_client.load_urdf("objects/plane/plane.urdf")
     bullet_client.infinite_step()
     bullet_client.disconnect()
 

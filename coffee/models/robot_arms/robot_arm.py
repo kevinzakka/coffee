@@ -6,7 +6,6 @@ import numpy as np
 from coffee import body
 from coffee.client import BulletClient
 from coffee.hints import Array
-from coffee.joints import JointState
 
 
 class RobotArm(abc.ABC, body.NamedBody):
@@ -44,69 +43,10 @@ class RobotArm(abc.ABC, body.NamedBody):
         self._fixed_base = fixed_base
         self._max_joint_position_error = max_joint_position_error
 
-    # @abc.abstractmethod
+    @abc.abstractmethod
     def set_joint_angles(self, joint_angles: np.ndarray) -> None:
         """Sets the joints of the robot to a given configuration.
 
         Args:
             joint_angles: The desired joints configuration for the robot arm.
         """
-        joint_angles = np.array(joint_angles, copy=False)
-        assert len(joint_angles) == self.joints.dof
-
-        # Clip the incoming joint angles to the actuation limits.
-        joint_angles = np.clip(
-            a=joint_angles,
-            a_min=self.joints.joints_lower_limit,
-            a_max=self.joints.joints_upper_limit,
-        )
-
-    # Methods to query the joint states.
-
-    def get_joint_positions(self) -> np.ndarray:
-        states = [
-            JointState(*js)
-            for js in self.pb_client.getJointStates(
-                self.body_id, self.joints.controllable_joints
-            )
-        ]
-        return np.asarray([state.joint_position for state in states])
-
-    def get_joint_velocities(self) -> np.ndarray:
-        states = [
-            JointState(*js)
-            for js in self.pb_client.getJointStates(
-                self.body_id, self.joints.controllable_joints
-            )
-        ]
-        return np.asarray([state.joint_velocity for state in states])
-
-    def get_joint_torques(self) -> np.ndarray:
-        states = [
-            JointState(*js)
-            for js in self.pb_client.getJointStates(
-                self.body_id, self.joints.controllable_joints
-            )
-        ]
-        return np.asarray([state.applied_joint_motor_torque for state in states])
-
-    #
-
-    def set_link_damping(self, linear: float, angular: float) -> None:
-        """Sets the linear and angular damping of the robot arm's links.
-
-        Args:
-            linear (float): The linear damping value, between 0 and 1.
-            angular (float): The angular damping value, between 0 and 1.
-        """
-        assert 0.0 <= linear <= 1.0
-        assert 0.0 <= angular <= 1.0
-
-        # NOTE(kevin): PyBullet's default is 0.04 for both.
-        for j in range(self.pb_client.getNumJoints(self.body_id)):
-            self.pb_client.changeDynamics(
-                bodyUniqueId=self.body_id,
-                linkIndex=j,
-                linearDamping=linear,
-                angularDamping=angular,
-            )

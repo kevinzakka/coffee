@@ -2,12 +2,15 @@ import pathlib
 
 import numpy as np
 
-from coffee import _SRC_ROOT
+from coffee import _URDF_PATH
 
 # Path to the URDF file.
 UR5_URDF: pathlib.Path = (
-    _SRC_ROOT / "models" / "vendor" / "universal_robot" / "ur_description" / "ur5.urdf"
+    _URDF_PATH / "robot_arms" / "universal_robot" / "ur5_description" / "ur5.urdf"
 )
+
+# Degrees of freedom.
+DOF = 6
 
 # Resting joint configuration.
 JOINT_RESTING_CONFIGURATION: np.ndarray = np.array(

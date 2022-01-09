@@ -1,9 +1,5 @@
 """Defines prop default values."""
 
-from coffee import _SRC_ROOT
-
-_PROP_ROOT = _SRC_ROOT / "models" / "props" / "assets"
-
 _BOX_WIDTH = 0.04
 _BOX_HEIGHT = 0.04
 _BOX_DEPTH = 0.04

@@ -23,6 +23,6 @@ if __name__ == "__main__":
         mode=client.ConnectionMode.GUI,
         config=client.ClientConfig(realtime=True),
     )
-    bullet_client.load_urdf("plane/plane.urdf")
+    bullet_client.load_urdf("objects/plane/plane.urdf")
     main(bullet_client)
     bullet_client.disconnect()

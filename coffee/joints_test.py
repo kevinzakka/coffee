@@ -10,7 +10,7 @@ from coffee.utils.testing_utils import _PI, _TWO_PI, BulletMultiDirectTestCase
 class JointsTest(BulletMultiDirectTestCase):
     def test_ur5(self) -> None:
         body_id = self.client.load_urdf(
-            "robots/universal_robot/ur_description/ur5.urdf"
+            "robot_arms/universal_robot/ur5_description/ur5.urdf"
         )
         joints = Joints.from_body_id(body_id, self.client)
 

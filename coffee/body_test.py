@@ -1,6 +1,6 @@
 """Tests for body."""
 
-from typing import Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 from absl.testing import absltest, parameterized
@@ -43,8 +43,8 @@ class BodyTest(testing_utils.BulletMultiDirectParameterizedTestCase):
 
         # Programmatically create a sphere of radius 0.1. This is one of the simplest
         # bodies that can be used for testing.
-        collision_args = {"shapeType": self.client.GEOM_SPHERE}
-        visual_args = {"shapeType": self.client.GEOM_SPHERE}
+        collision_args: Dict[str, Any] = {"shapeType": self.client.GEOM_SPHERE}
+        visual_args: Dict[str, Any] = {"shapeType": self.client.GEOM_SPHERE}
         collision_args["radius"] = 0.1
         visual_args["radius"] = 0.1
         v_id = self.client.createVisualShape(**visual_args)

@@ -167,6 +167,11 @@ class Joints:
         return False
 
     @property
+    def link_names(self) -> Tuple[str, ...]:
+        """Returns a tuple of link names."""
+        return tuple(joint_info.link_name for joint_info in self.joints_info)
+
+    @property
     def name2index(self) -> Dict[str, int]:
         """A dictionary mapping joint names to joint indices."""
         return {

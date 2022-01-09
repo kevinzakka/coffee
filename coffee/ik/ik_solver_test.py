@@ -24,14 +24,14 @@ _SEED = 42
 _ARM_PARAMS = [
     {
         "testcase_name": "arm_ur5",
-        "urdf": "robots/universal_robot/ur_description/ur5.urdf",
+        "urdf": "robot_arms/universal_robot/ur5_description/ur5.urdf",
         "joint_resting_configuration": np.asarray(
             [j * np.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.0]]
         ),
     },
     {
         "testcase_name": "arm_xarm7",
-        "urdf": "robots/ufactory/xarm_description/xarm7.urdf",
+        "urdf": "robot_arms/ufactory/xarm7_description/xarm7.urdf",
         "joint_resting_configuration": np.asarray([0] * 7),
     },
 ]

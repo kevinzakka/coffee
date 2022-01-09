@@ -1,5 +1,7 @@
 from typing import Optional
 
+import numpy as np
+
 from coffee.client import BulletClient
 from coffee.hints import Array
 from coffee.models.robot_arms import robot_arm
@@ -19,6 +21,7 @@ class UR5(robot_arm.RobotArm):
         max_joint_position_error: float = consts.MAX_JOINT_POSITION_ERROR,
     ) -> None:
         flags = pb_client.URDF_ENABLE_CACHED_GRAPHICS_SHAPES
+        # flags |= pb_client.URDF_USE_SELF_COLLISION  # type: ignore
 
         body_id = pb_client.load_urdf(
             str(consts.UR5_URDF),
@@ -35,3 +38,6 @@ class UR5(robot_arm.RobotArm):
             fixed_base=fixed_base,
             max_joint_position_error=max_joint_position_error,
         )
+
+    def set_joint_angles(self, joint_angles: np.ndarray) -> None:
+        pass

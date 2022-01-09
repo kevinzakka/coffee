@@ -16,7 +16,7 @@ import numpy as np
 import pybullet as p
 from dm_robotics.geometry.geometry import Pose
 
-from coffee import ASSETS_PATH
+from coffee import _URDF_PATH
 from coffee.utils import geometry_utils
 
 
@@ -49,6 +49,7 @@ class ClientConfig:
     height: Optional[int] = None
     gravity: Tuple[float, float, float] = (0.0, 0.0, -9.81)
     physics_timestep: float = 1.0 / 240.0
+    debug_panels: bool = False
 
 
 def _gui_options(cfg: ClientConfig) -> str:
@@ -113,7 +114,7 @@ class BulletClient:
             self._simulation_step_setup()
             self._gui_setup()
 
-        self.setAdditionalSearchPath(ASSETS_PATH)
+        self.setAdditionalSearchPath(str(_URDF_PATH))
 
     def __repr__(self) -> str:
         return f"BulletClient(client_id={self.client_id}, pid={self.pid})"
@@ -154,8 +155,9 @@ class BulletClient:
                 cameraPitch=-25,
                 cameraTargetPosition=(0.0, 0.0, 0.0),
             )
-            # Clear the GUI panels.
-            self.configureDebugVisualizer(self.COV_ENABLE_GUI, False)
+            if not self.config.debug_panels:
+                # Clear the GUI panels.
+                self.configureDebugVisualizer(self.COV_ENABLE_GUI, False)
             # Enable or disable shadows.
             self.configureDebugVisualizer(
                 self.COV_ENABLE_SHADOWS, self.config.render_shadows
