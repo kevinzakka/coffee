@@ -18,10 +18,12 @@ class Joints:
     refine its solution.
 
     Attributes:
-        body_id:
-        joints_info:
-        controllable_joints:
-        non_controllable_joints:
+        body_id: The unique ID of the body.
+        joints_info: A tuple of `JointInfo` objects, one for each joint.
+        controllable_joints: A tuple of indices designating the controllable joints of
+            the body.
+        non_controllable_joints: A tuple of indices designating the non-controllable
+            joints of the body.
     """
 
     body_id: int

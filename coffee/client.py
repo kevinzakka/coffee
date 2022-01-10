@@ -258,6 +258,11 @@ class BulletClient:
 
         return body_id
 
+    def remove_body(self, body_id: int) -> None:
+        """Removes a body from the physics client."""
+        self.removeBody(body_id)
+        self._body_cache.pop(body_id)
+
     # Properties.
 
     @property

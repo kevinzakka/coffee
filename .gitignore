@@ -3,4 +3,3 @@ __pycache__/
 *.mp4
 temp/
 .dmypy*
-third_party/

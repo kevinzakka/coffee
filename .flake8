@@ -3,3 +3,4 @@
 # E501: line too long (<n> characters)
 # W503: line break before binary operator
 ignore = E203,E501,W503
+exclude = third_party
