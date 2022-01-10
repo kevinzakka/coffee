@@ -209,4 +209,29 @@
     </collision>
   </link>
 
+  <joint name="tcp_joint" type="fixed">
+    <parent link="wsg_base_link"/>
+    <child link="pinch_site"/>
+    <origin rpy="3.141592653589793 0 0" xyz="0 0 0.14"/>
+  </joint>
+  <link name="pinch_site">
+    <collision>
+      <geometry>
+        <box size="0 0 0"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0"/>
+      <origin rpy="0. 0. 0." xyz="0 0 0"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </visual>
+  </link>
+
 </robot>

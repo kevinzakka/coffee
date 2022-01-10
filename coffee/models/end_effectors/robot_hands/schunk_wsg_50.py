@@ -17,6 +17,7 @@ _MIMIC_CHILDREN_LINK_NAMES = ("gripper_left",)
 _MIMIC_COEFFICIENTS = {
     "gripper_left": -1,
 }
+_TCP_LINK_NAME = "pinch_site"
 
 
 class SchunkWsg50(robot_hand.RobotHand):
@@ -90,5 +91,6 @@ class SchunkWsg50(robot_hand.RobotHand):
             positionGains=[2 * 0.1] * len(self._mimic_children_ids),
         )
 
-    def tool_center_point(self):
-        pass
+    @property
+    def tool_center_point(self) -> str:
+        return _TCP_LINK_NAME

@@ -1,5 +1,4 @@
 import abc
-import tempfile
 from typing import Optional
 
 import numpy as np
@@ -7,9 +6,6 @@ import numpy as np
 from coffee import body
 from coffee.client import BulletClient
 from coffee.hints import Array
-from coffee.joints import Joints
-from coffee.models.end_effectors.robot_hands import robot_hand
-from coffee.third_party.urdf_editor import UrdfEditor
 
 
 class RobotArm(abc.ABC, body.NamedBody):
@@ -63,6 +59,10 @@ class RobotArm(abc.ABC, body.NamedBody):
             return self.joints.controllable_joints[-1]
         return self.joints.get_joint_index_from_link_name(self._ik_point_link_name)
 
+    @property
+    def fixed_base(self) -> bool:
+        return self._fixed_base
+
     @abc.abstractmethod
     def set_joint_angles(self, joint_angles: np.ndarray) -> None:
         """Sets the joints of the robot to a given configuration.
@@ -70,58 +70,3 @@ class RobotArm(abc.ABC, body.NamedBody):
         Args:
             joint_angles: The desired joints configuration for the robot arm.
         """
-
-    def attach(
-        self,
-        hand: robot_hand.RobotHand,
-    ) -> None:
-        """Attaches a robot hand to the arm.
-
-        PyBullet's `createConstraint` mechanism is broken. This function creates
-        a new temporary URDF file by joining that of the arm and the hand, loads it
-        into simulation and deletes the original arm and hand bodies.
-        """
-        with self._pb_client.disable_rendering():
-            arm_editor = UrdfEditor()
-            arm_editor.initializeFromBulletBody(self.body_id, self._pb_client.client_id)
-
-            hand_editor = UrdfEditor()
-            hand_editor.initializeFromBulletBody(
-                hand.body_id, self._pb_client.client_id
-            )
-
-            newjoint = arm_editor.joinUrdf(
-                childEditor=hand_editor,
-                parentLinkIndex=arm_editor.linkNameToIndex[self._ik_point_link_name],
-                jointPivotXYZInParent=[0, 0, 0],
-                jointPivotRPYInParent=[np.pi, 0, 0],
-                jointPivotXYZInChild=[0, 0, 0],
-                jointPivotRPYInChild=[0, 0, 0],
-                parentPhysicsClientId=self._pb_client.client_id,
-                childPhysicsClientId=self._pb_client.client_id,
-            )
-            newjoint.joint_type = self._pb_client.JOINT_FIXED
-            newjoint.joint_name = "joint_arm_gripper"
-
-            self._tf = tempfile.NamedTemporaryFile(suffix=".urdf", delete=True)
-            arm_editor.saveUrdf(self._tf.name)
-            self._tf.flush()
-
-            self._pb_client.remove_body(self._body_id)
-            self._pb_client.remove_body(hand.body_id)
-
-            self._body_id = self._pb_client.load_urdf(
-                filename=self._tf.name,
-                fixed_base=self._fixed_base,
-            )
-
-            self.configure_joints(self._joint_resting_configuration)
-
-            # Reload the joint information.
-            self._joints = Joints.from_body_id(
-                body_id=self._body_id,
-                pb_client=self._pb_client,
-            )
-
-    def __del__(self) -> None:
-        self._tf.close()

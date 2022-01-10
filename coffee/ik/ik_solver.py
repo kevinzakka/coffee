@@ -106,11 +106,12 @@ class IKSolver:
                 a user could provide the initial guess that is close to the desired
                 solution. If None, all the joints will be set to 0 for the first
                 attempt.
-            nullspace_reference: The desired joint configuration. When the controlled
-                element is in the desired pose, the solver will try and bring the joint
-                configuration closer to the nullspace reference without moving the
-                element. If no nullspace reference is provided, the center of the joint
-                ranges is used as reference.
+            nullspace_reference: The desired joint configuration that is set as the
+                nullspace goal. When the controlled element is in the desired pose, the
+                solver will try and bring the joint configuration closer to the
+                nullspace reference without moving the element. If no nullspace
+                reference is provided, the center of the joint ranges is used as
+                reference. Can be overriden in the `solve` method.
 
         Returns:
             The corresponding joint configuration if a solution is found, else None.

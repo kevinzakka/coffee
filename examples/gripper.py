@@ -1,11 +1,12 @@
-from dm_robotics.geometry import geometry
+import time
+
+import numpy as np
+from dm_robotics.geometry import geometry, pose_distribution
 
 from coffee import client
-from coffee.ik.ik_solver import IKSolver
-
-# from coffee.ik.simple_ik_solver import SimpleIKSolver
-from coffee.models import robot_arms
+from coffee.models import props, robot_arms
 from coffee.models.end_effectors.robot_hands.schunk_wsg_50 import SchunkWsg50
+from coffee.robot import Robot
 
 
 def main(bullet_client: client.BulletClient) -> None:
@@ -13,34 +14,54 @@ def main(bullet_client: client.BulletClient) -> None:
         arm = robot_arms.UR5(bullet_client)
         # arm = robot_arms.xArm7(bullet_client)
         # arm = robot_arms.IIWA(bullet_client)
-        arm.configure_joints(arm._joint_resting_configuration)
 
-        hand = SchunkWsg50(bullet_client, scaling=0.6)
-        hand.reset_pose([0.5, -0.5, 0.1])
+        gripper = SchunkWsg50(bullet_client, scaling=1.0)
+        gripper.reset_pose([0.5, -0.5, 0.1])
 
-        arm.attach(hand)
+        print("hi")
 
-    ik_solver = IKSolver(
-        bullet_client,
-        arm.joints,
-        arm.ik_point_link_id,
-        joint_damping=1e-3,
-        nullspace_reference=arm._joint_resting_configuration,
+        robot = Robot(
+            pb_client=bullet_client,
+            arm=arm,
+            gripper=gripper,
+            arm_effector=None,  # type: ignore
+            gripper_effector=None,  # type: ignore
+            name=f"{arm.name}_{gripper.name}",
+        )
+
+        robot.position_arm_joints(robot.arm.joint_resting_configuration)
+
+    # Load a block prop.
+    block = props.Box(bullet_client, color=(0.3412, 0.3490, 1, 1))
+
+    # Create a pose distribution from which to sample the pose of the block.
+    pos_dist = pose_distribution.UniformPoseDistribution(
+        min_pose_bounds=[0.5, -0.5, 0.1, 0, 0, 0],
+        max_pose_bounds=[0.7, 0.5, 0.2, 0, 0, 0],
     )
-    # ik_solver = SimpleIKSolver(
-    #     pb_client=bullet_client,
-    #     joints=arm.joints,
-    #     ik_point_joint_id=arm.ik_point_link_id,
-    #     joint_damping=1e-3,
-    # )
+    rng = np.random.RandomState()
 
-    bullet_client.infinite_step()
+    for _ in range(5):
+        # Randomize the object's pose.
+        pos, quat = pos_dist.sample_pose(rng)
+        block.reset_pose(pos, quat)
+        steps_per_second = int(2 / bullet_client.config.physics_timestep)
+        for _ in range(steps_per_second):
+            bullet_client.step()
 
-    eef_pose = geometry.Pose(position=[0.5, 0, 0.2])
-    qpos = ik_solver.solve(eef_pose)
-    if qpos is not None:
-        arm.configure_joints(qpos)
-    bullet_client.infinite_step()
+        pos, _ = block.get_pose()
+        pos[-1] += block.half_extents[-1] + 5e-2
+        eef_pose = geometry.Pose(pos)
+
+        try:
+            robot.position_gripper(eef_pose.position, eef_pose.quaternion)
+        except ValueError:
+            continue
+
+        steps_per_second = int(0.5 / bullet_client.config.physics_timestep)
+        for _ in range(steps_per_second):
+            bullet_client.step()
+            time.sleep(0.01)
 
 
 if __name__ == "__main__":
@@ -48,6 +69,6 @@ if __name__ == "__main__":
         mode=client.ConnectionMode.GUI,
         config=client.ClientConfig(),
     )
-    bullet_client.load_urdf("objects/plane/plane.urdf")
+    bullet_client.load_urdf("objects/plane/plane.urdf", maximal_coordinates=True)
     main(bullet_client)
     bullet_client.disconnect()

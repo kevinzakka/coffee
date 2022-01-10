@@ -22,5 +22,5 @@ class RobotHand(abc.ABC, body.NamedBody):
 
     @property
     @abc.abstractmethod
-    def tool_center_point(self):
-        """Tool center point site of the hand."""
+    def tool_center_point(self) -> str:
+        """Tool center point link name."""

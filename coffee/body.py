@@ -49,7 +49,7 @@ class Body(metaclass=abc.ABCMeta):
     # Methods.
 
     def is_fixed(self) -> bool:
-        """Returns True if the base of the body is static, ie its mass is 0."""
+        """Returns True if the base of the body is static, i.e., its mass is 0."""
         return (
             structs.DynamicsInfo(
                 *self.pb_client.getDynamicsInfo(self.body_id, structs.BASE_LINK_ID)
