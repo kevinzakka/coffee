@@ -14,15 +14,15 @@ class GeometryUtilsTest(absltest.TestCase):
         self.assertTrue(np.isclose(np.linalg.norm(output_array), 1.0))
 
     def test_as_quaternion_xyzw(self) -> None:
-        input_quaternion = np.asarray([1.0, 2.0, 3.0, 4.0])
+        input_quaternion = np.array([1.0, 2.0, 3.0, 4.0])
         output_quaternion = geometry_utils.as_quaternion_xyzw(input_quaternion)
-        expected_quaternion = np.asarray([2.0, 3.0, 4.0, 1.0])
+        expected_quaternion = np.array([2.0, 3.0, 4.0, 1.0])
         np.testing.assert_array_equal(output_quaternion, expected_quaternion)
 
     def test_as_quaternion_wxyz(self) -> None:
-        input_quaternion = np.asarray([1.0, 2.0, 3.0, 4.0])
+        input_quaternion = np.array([1.0, 2.0, 3.0, 4.0])
         output_quaternion = geometry_utils.as_quaternion_wxyz(input_quaternion)
-        expected_quaternion = np.asarray([4.0, 1.0, 2.0, 3.0])
+        expected_quaternion = np.array([4.0, 1.0, 2.0, 3.0])
         np.testing.assert_array_equal(output_quaternion, expected_quaternion)
 
 

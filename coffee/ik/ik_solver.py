@@ -9,7 +9,8 @@ from dm_robotics.geometry.geometry import Pose
 from dm_robotics.transformations import transformations as tr
 
 from coffee.client import BulletClient, ClientConfig, ConnectionMode
-from coffee.joints import Joints, LinkState
+from coffee.joints import Joints
+from coffee.structs import LinkState
 from coffee.utils import geometry_utils
 
 
@@ -45,14 +46,12 @@ class IKSolver:
     joint_damping: float = 0.0
     """The damping coefficient used to stabilize the IK solution."""
 
-    nullspace_joint_position_reference: Optional[np.ndarray] = None
+    nullspace_reference: Optional[np.ndarray] = None
     """"""
 
     def __post_init__(self) -> None:
-        if self.nullspace_joint_position_reference is None:
-            self.nullspace_joint_position_reference = 0.5 * np.sum(
-                self.joints.joints_range, axis=1
-            )
+        if self.nullspace_reference is None:
+            self.nullspace_reference = 0.5 * np.sum(self.joints.joints_range, axis=1)
 
         # Dirty hack to get around pybullet's lack of support for computing FK given a
         # joint configuration as an argument.
@@ -122,7 +121,7 @@ class IKSolver:
                 length.
         """
         if nullspace_reference is None:
-            nullspace_reference = self.nullspace_joint_position_reference
+            nullspace_reference = self.nullspace_reference
         else:
             if len(nullspace_reference) != self.joints.dof:
                 raise ValueError("nullspace_reference has an invalid length.")

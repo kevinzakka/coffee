@@ -25,14 +25,14 @@ _ARM_PARAMS = [
     {
         "testcase_name": "arm_ur5",
         "urdf": "robot_arms/universal_robot/ur5_description/ur5.urdf",
-        "joint_resting_configuration": np.asarray(
+        "joint_resting_configuration": np.array(
             [j * np.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.0]]
         ),
     },
     {
         "testcase_name": "arm_xarm7",
         "urdf": "robot_arms/ufactory/xarm7_description/xarm7.urdf",
-        "joint_resting_configuration": np.asarray([0] * 7),
+        "joint_resting_configuration": np.array([0] * 7),
     },
 ]
 
@@ -52,10 +52,10 @@ class IKSolverTest(BulletMultiDirectParameterizedTestCase):
             pb_client=self.client,
             ik_point_joint_id=joints.get_joint_index_from_link_name("ee_link"),
             joints=joints,
-            nullspace_joint_position_reference=joint_resting_configuration,
+            nullspace_reference=joint_resting_configuration,
         )
         ref_pose = geometry.Pose([0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0])
-        wrong_nullspace_ref = np.asarray([0.0, 0.0, 0.0])
+        wrong_nullspace_ref = np.array([0.0, 0.0, 0.0])
         with self.assertRaises(ValueError):
             ik_solver.solve(ref_pose, nullspace_reference=wrong_nullspace_ref)
 
@@ -71,10 +71,10 @@ class IKSolverTest(BulletMultiDirectParameterizedTestCase):
             pb_client=self.client,
             ik_point_joint_id=joints.get_joint_index_from_link_name("ee_link"),
             joints=joints,
-            nullspace_joint_position_reference=joint_resting_configuration,
+            nullspace_reference=joint_resting_configuration,
         )
         ref_pose = geometry.Pose([0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0])
-        wrong_initial_joint_configuration = np.asarray([0.0, 0.0, 0.0])
+        wrong_initial_joint_configuration = np.array([0.0, 0.0, 0.0])
         with self.assertRaises(ValueError):
             ik_solver.solve(
                 ref_pose, inital_joint_configuration=wrong_initial_joint_configuration
@@ -97,7 +97,8 @@ class IKSolverTest(BulletMultiDirectParameterizedTestCase):
             pb_client=self.client,
             ik_point_joint_id=joints.get_joint_index_from_link_name("ee_link"),
             joints=joints,
-            nullspace_joint_position_reference=joint_resting_configuration,
+            nullspace_reference=joint_resting_configuration,
+            joint_damping=1e-3,
         )
 
         # Create a distribution from which reference poses will be sampled.

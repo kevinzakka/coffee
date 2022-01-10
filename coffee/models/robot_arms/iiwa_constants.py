@@ -21,7 +21,7 @@ DOF = 7
 JOINT_RESTING_CONFIGURATION: np.ndarray = np.zeros(DOF)
 
 # Last link name.
-IK_POINT_LINK_NAME: str = "iiwa_link_ee"
+IK_POINT_LINK_NAME: str = "ee_link"
 
 # Fixed base.
 FIXED_BASE: bool = True

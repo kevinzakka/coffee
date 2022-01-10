@@ -38,10 +38,26 @@ class RobotArm(abc.ABC, body.NamedBody):
         """
         super().__init__(name=name, body_id=body_id, pb_client=pb_client)
 
-        self._joint_resting_configuration = joint_resting_configuration
+        self._joint_resting_configuration = np.array(joint_resting_configuration)
         self._ik_point_link_name = ik_point_link_name
         self._fixed_base = fixed_base
         self._max_joint_position_error = max_joint_position_error
+
+    @property
+    def joint_resting_configuration(self) -> np.ndarray:
+        return self._joint_resting_configuration
+
+    @property
+    def ik_point_link_name(self) -> str:
+        if self._ik_point_link_name is None:
+            return self._joints.joints_info[-1].link_name
+        return self._ik_point_link_name
+
+    @property
+    def ik_point_link_id(self) -> int:
+        if self._ik_point_link_name is None:
+            return self.joints.controllable_joints[-1]
+        return self.joints.get_joint_index_from_link_name(self._ik_point_link_name)
 
     @abc.abstractmethod
     def set_joint_angles(self, joint_angles: np.ndarray) -> None:

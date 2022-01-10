@@ -10,8 +10,9 @@ from dm_robotics.transformations import transformations as tr
 
 from coffee.client import BulletClient
 from coffee.hints import Array
-from coffee.joints import Joints, LinkState
+from coffee.joints import Joints
 from coffee.sensors.intrinsic import Intrinsic
+from coffee.structs import LinkState
 from coffee.utils.geometry_utils import as_quaternion_wxyz
 
 
@@ -80,7 +81,7 @@ class CameraParams:
             nearVal=self.znear,
             farVal=self.zfar,
         )
-        return np.asarray(K, dtype=np.float32).reshape(4, 4)
+        return np.array(K, dtype=np.float32).reshape(4, 4)
 
 
 class CameraPose(Protocol):

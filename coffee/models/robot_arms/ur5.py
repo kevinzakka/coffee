@@ -25,7 +25,7 @@ class UR5(robot_arm.RobotArm):
 
         body_id = pb_client.load_urdf(
             str(consts.UR5_URDF),
-            useFixedBase=fixed_base,
+            fixed_base=fixed_base,
             flags=flags,
         )
 

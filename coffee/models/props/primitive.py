@@ -92,6 +92,8 @@ class Box(Primitive):
         name: str = "box",
     ) -> None:
 
+        self._half_extents = half_extents
+
         collision_args = dict(
             shapeType=p.GEOM_BOX,
             halfExtents=half_extents,
@@ -109,6 +111,10 @@ class Box(Primitive):
             mass=mass,
             color=color,
         )
+
+    @property
+    def half_extents(self) -> Tuple[float, float, float]:
+        return self._half_extents
 
 
 class Cylinder(Primitive):

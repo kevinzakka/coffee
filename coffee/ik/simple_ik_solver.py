@@ -8,7 +8,8 @@ import pybullet as p
 from dm_robotics.geometry.geometry import Pose
 
 from coffee.client import BulletClient
-from coffee.joints import Joints, LinkState
+from coffee.joints import Joints
+from coffee.structs import LinkState
 from coffee.utils import geometry_utils
 
 

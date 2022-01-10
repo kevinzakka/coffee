@@ -254,7 +254,7 @@
   <joint name="ee_fixed_joint" type="fixed">
     <parent link="link7"/>
     <child link="ee_link"/>
-    <origin rpy="0.0 0.0 0" xyz="0.0 0.0 0.0"/>
+    <origin rpy="0 3.141592653589793 3.141592653589793" xyz="0.0 0.0 0.0"/>
   </joint>
   <link name="ee_link">
     <collision>
@@ -265,7 +265,7 @@
     </collision>
     <inertial>
       <mass value="0.0"/>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0. 0. 0." xyz="0 0 0"/>
       <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
     </inertial>
   </link>

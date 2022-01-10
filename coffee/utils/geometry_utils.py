@@ -28,8 +28,8 @@ def as_quaternion_wxyz(xyzw: Array) -> np.ndarray:
 
 def quaternion_equal(actual: Array, expected: Array) -> bool:
     """Returns True if two quaternions are equal."""
-    actual = np.asarray(actual)
-    expected = np.asarray(expected)
+    actual = np.array(actual)
+    expected = np.array(expected)
     return np.allclose(actual, expected) or np.allclose(actual, expected * -1)
 
 

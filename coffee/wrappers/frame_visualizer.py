@@ -21,7 +21,7 @@ class FrameVisualizer:
             link_name: The name of the link to draw the frame on.
         """
         froms = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-        tos = [[1.0, 0, 0], [0, 1.0, 0], [0, 0, 1.0]]
+        tos = [[0.1, 0, 0], [0, 0.1, 0], [0, 0, 0.1]]
         colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 
         for lf, lt, lc in zip(froms, tos, colors):

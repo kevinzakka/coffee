@@ -6,6 +6,7 @@ from typing import Optional, Tuple
 import numpy as np
 from dm_robotics.transformations import transformations as tr
 
+from coffee import structs
 from coffee.client import BulletClient
 from coffee.hints import Array
 from coffee.joints import Joints
@@ -47,11 +48,20 @@ class Body(metaclass=abc.ABCMeta):
 
     # Methods.
 
+    def is_fixed(self) -> bool:
+        """Returns True if the base of the body is static, ie its mass is 0."""
+        return (
+            structs.DynamicsInfo(
+                *self.pb_client.getDynamicsInfo(self.body_id, structs.BASE_LINK_ID)
+            ).mass
+            == structs.STATIC_MASS
+        )
+
     def get_pose(self) -> Tuple[np.ndarray, np.ndarray]:
         position, quaternion = self.pb_client.getBasePositionAndOrientation(
             self.body_id
         )
-        position = np.asarray(position)
+        position = np.array(position)
         quaternion = geometry_utils.as_quaternion_wxyz(quaternion)
         return position, quaternion
 
@@ -103,8 +113,8 @@ class Body(metaclass=abc.ABCMeta):
 
     def get_velocity(self) -> Tuple[np.ndarray, np.ndarray]:
         linear_velocity, angular_velocity = self.pb_client.getBaseVelocity(self.body_id)
-        linear_velocity = np.asarray(linear_velocity)
-        angular_velocity = np.asarray(angular_velocity)
+        linear_velocity = np.array(linear_velocity)
+        angular_velocity = np.array(angular_velocity)
         return linear_velocity, angular_velocity
 
     def reset_velocity(
@@ -117,20 +127,20 @@ class Body(metaclass=abc.ABCMeta):
         if linear is not None:
             if len(np.asarray(linear)) != 3:
                 raise ValueError("Linear velocity must be a length 3 vector.")
-            linear = np.asarray(linear)
+            linear = np.array(linear)
         else:
             linear = np.zeros(3)
         if angular is not None:
             if len(np.asarray(angular)) != 3:
                 raise ValueError("Angular velocity must be a length 3 vector.")
-            angular = np.asarray(angular)
+            angular = np.array(angular)
         else:
             angular = np.zeros(3)
 
         self.pb_client.resetBaseVelocity(self.body_id, linear, angular)
 
     def configure_joints(self, position: Array) -> None:
-        position = np.asarray(position)
+        position = np.array(position)
         assert len(position) == self.joints.dof
 
         for i, joint_id in enumerate(self.joints.controllable_joints):
@@ -139,6 +149,19 @@ class Body(metaclass=abc.ABCMeta):
                 joint_id,
                 targetValue=position[i],
                 targetVelocity=0.0,
+            )
+
+    def set_link_damping(self, linear: float, angular: float) -> None:
+        """Set linear and angular damping of the body links."""
+        assert 0.0 <= linear <= 1.0
+        assert 0.0 <= angular <= 1.0
+
+        for joint_info in self.joints.joints_info:
+            self.pb_client.changeDynamics(
+                bodyUniqueId=self.body_id,
+                linkIndex=joint_info.joint_index,
+                linearDamping=linear,
+                angularDamping=angular,
             )
 
 

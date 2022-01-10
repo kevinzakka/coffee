@@ -1,90 +1,12 @@
 from __future__ import annotations
 
 import dataclasses
-import enum
-from typing import Dict, Optional, Tuple
+from typing import Dict, Tuple
 
 import numpy as np
 
 from coffee.client import BulletClient
-
-
-class JointType(enum.Enum):
-    """Enum for specifying the joint of type."""
-
-    REVOLUTE = 0
-    PRISMATIC = 1
-    SPHERICAL = 2
-    PLANAR = 3
-    FIXED = 4
-
-
-@dataclasses.dataclass(frozen=True)
-class JointState:
-    """Holds the state of a joint.
-
-    Attributes:
-        joint_position: The position of the joint.
-        joint_velocity: The velocity of the joint.
-        joint_reaction_forces: Joint reaction forces. If torque sensing is disabled for
-            the joint, these will be all zeros.
-        applied_joint_motor_torque: The motor torque applied during the last simulation
-            step.
-    """
-
-    joint_position: float
-    joint_velocity: float
-    joint_reaction_forces: Tuple[float, ...]
-    applied_joint_motor_torque: float
-
-
-@dataclasses.dataclass(frozen=True)
-class LinkState:
-    """Holds the state of a link.
-
-    Attributes:
-        link_world_position: Position of the link COM in world coordinates.
-        link_world_orientation: Orientation of the link COM in world coordinates.
-        world_link_frame_position: Position of the URDF link frame in world coordinates.
-        world_link_frame_orientation: Orientation of the URDF link frame in world
-            coordinates.
-    """
-
-    link_world_position: Tuple[float, ...]
-    link_world_orientation: Tuple[float, ...]
-    local_inerital_frame_position: Tuple[float, ...]
-    local_inerital_frame_orientation: Tuple[float, ...]
-    world_link_frame_position: Tuple[float, ...]
-    world_link_frame_orientation: Tuple[float, ...]
-    world_link_linear_velocity: Optional[Tuple[float, ...]] = None
-    world_link_angular_velocity: Optional[Tuple[float, ...]] = None
-
-
-@dataclasses.dataclass(frozen=True)
-class JointInfo:
-    """Holds joint information."""
-
-    joint_index: int
-    joint_name: str
-    joint_type: int
-    q_index: int
-    u_index: int
-    flags: int
-    joint_damping: float
-    joint_friction: float
-    joint_lower_limit: float
-    joint_upper_limit: float
-    joint_max_force: float
-    joint_max_velocity: float
-    link_name: str
-    joint_axis: Tuple[float, ...]
-    parent_frame_pos: Tuple[float, ...]
-    parent_frame_orn: Tuple[float, ...]
-    parent_index: int
-
-    def __post_init__(self) -> None:
-        super().__setattr__("joint_name", self.joint_name.decode("utf-8"))  # type: ignore
-        super().__setattr__("link_name", self.link_name.decode("utf-8"))  # type: ignore
+from coffee.structs import JointInfo, JointType
 
 
 @dataclasses.dataclass(frozen=True)
@@ -197,7 +119,7 @@ class Joints:
                 lower.append(joint_info.joint_lower_limit)
             else:
                 lower.append(0.0)
-        return np.asarray(lower, dtype=np.float64)
+        return np.array(lower, dtype=np.float64)
 
     @property
     def joints_upper_limit(self) -> np.ndarray:
@@ -207,7 +129,7 @@ class Joints:
                 upper.append(joint_info.joint_upper_limit)
             else:
                 upper.append(2.0 * np.pi)
-        return np.asarray(upper, dtype=np.float64)
+        return np.array(upper, dtype=np.float64)
 
     @property
     def joints_range(self) -> np.ndarray:
@@ -219,14 +141,14 @@ class Joints:
         max_force = []
         for joint_info in [self.joints_info[i] for i in self.controllable_joints]:
             max_force.append(joint_info.joint_max_force)
-        return np.asarray(max_force, dtype=np.float32)
+        return np.array(max_force, dtype=np.float32)
 
     @property
     def joints_max_velocity(self) -> np.ndarray:
         max_velocity = []
         for joint_info in [self.joints_info[i] for i in self.controllable_joints]:
             max_velocity.append(joint_info.joint_max_velocity)
-        return np.asarray(max_velocity, dtype=np.float64)
+        return np.array(max_velocity, dtype=np.float64)
 
     # Array creation.
 

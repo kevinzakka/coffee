@@ -10,20 +10,13 @@ import pkgutil
 import platform
 import threading
 import time
-from typing import Any, Callable, Dict, Iterator, NamedTuple, Optional, Tuple
+from typing import Any, Callable, Dict, Iterator, Optional, Tuple
 
-import numpy as np
 import pybullet as p
 from dm_robotics.geometry.geometry import Pose
 
 from coffee import _URDF_PATH
 from coffee.utils import geometry_utils
-
-
-class BodyState(NamedTuple):
-    pose: Pose
-    linear_velocity: np.ndarray
-    angular_velocity: np.ndarray
 
 
 class ConnectionMode(enum.Enum):
@@ -41,7 +34,7 @@ class ConnectionMode(enum.Enum):
 class ClientConfig:
     """PyBullet client configuration."""
 
-    realtime: bool = True
+    realtime: bool = False
     egl_render: bool = False
     render_shadows: bool = True
     color: Optional[Tuple[int, int, int]] = None
@@ -231,7 +224,9 @@ class BulletClient:
         filename: str,
         pose: Optional[Pose] = None,
         scaling: float = 1.0,
-        **kwargs,
+        fixed_base: bool = False,
+        maximal_coordinates: bool = False,
+        flags: Any = 0,
     ) -> int:
         """Loads a URDF file into the physics client."""
         assert scaling > 0.0, "Scaling must be greater than 0."
@@ -246,7 +241,9 @@ class BulletClient:
             basePosition=base_position,
             baseOrientation=base_orientation,
             globalScaling=scaling,
-            **kwargs,
+            useFixedBase=fixed_base,
+            useMaximalCoordinates=maximal_coordinates,
+            # flags=flags,
         )
 
         # Cache.
@@ -254,7 +251,9 @@ class BulletClient:
             "filename": filename,
             "pose": pose,
             "scaling": scaling,
-            **kwargs,
+            "fixed_base": fixed_base,
+            "maximal_coordinates": maximal_coordinates,
+            "flags": flags,
         }
 
         return body_id
@@ -296,3 +295,5 @@ class BulletClient:
     def thread_alive(self) -> bool:
         with self._thread_alive_lock:
             return self._thread_alive
+
+    # TODO(kevin): Add save and load simulation state methods.

@@ -12,7 +12,7 @@ def main(bullet_client: client.BulletClient) -> None:
 if __name__ == "__main__":
     bullet_client = client.BulletClient.create(
         mode=client.ConnectionMode.GUI,
-        config=client.ClientConfig(realtime=True),
+        config=client.ClientConfig(),
     )
     bullet_client.load_urdf("objects/short_floor.urdf")
     main(bullet_client)
