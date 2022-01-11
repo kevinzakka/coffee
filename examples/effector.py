@@ -10,11 +10,10 @@ from coffee.wrappers import FrameVisualizer
 def main(bullet_client: client.BulletClient) -> None:
     with bullet_client.disable_rendering():
         # Load the arm.
-        # arm = robot_arms.UR5(bullet_client)
+        arm = robot_arms.UR5(bullet_client)
         # arm = robot_arms.xArm7(bullet_client)
-        arm = robot_arms.IIWA(bullet_client)
+        # arm = robot_arms.IIWA(bullet_client)
         arm.configure_joints(arm._joint_resting_configuration)
-        arm.set_link_damping(0.0, 0.0)
 
     # Wait for prop to settle.
     steps_per_second = int(1 / bullet_client.config.physics_timestep)
@@ -44,8 +43,8 @@ def main(bullet_client: client.BulletClient) -> None:
 
     # Create a pose distribution from which to sample the pose of the block.
     pos_dist = pose_distribution.UniformPoseDistribution(
-        min_pose_bounds=[-0.5, -0.5, 0.1, 0, 0, 0],
-        max_pose_bounds=[0.5, +0.5, 0.1, 0, 0, 0],
+        min_pose_bounds=[0.3, -0.5, 0.1, 0, 0, 0],
+        max_pose_bounds=[0.55, +0.5, 0.1, 0, 0, 0],
     )
     rng = np.random.RandomState()
 
@@ -58,12 +57,10 @@ def main(bullet_client: client.BulletClient) -> None:
             bullet_client.step()
 
         pos, _ = block.get_pose()
-        pos[-1] += block.half_extents[-1] + 5e-3  # Add 5mm slack.
+        pos[-1] += block.half_extents[-1] + 1e-2
         eef_pose = geometry.Pose(pos)
 
         cartesian_effector.set_control(eef_pose.to_posquat())
-
-    bullet_client.infinite_step()
 
 
 if __name__ == "__main__":

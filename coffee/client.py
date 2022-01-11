@@ -243,7 +243,7 @@ class BulletClient:
             globalScaling=scaling,
             useFixedBase=fixed_base,
             useMaximalCoordinates=maximal_coordinates,
-            # flags=flags,
+            flags=flags,
         )
 
         # Cache.

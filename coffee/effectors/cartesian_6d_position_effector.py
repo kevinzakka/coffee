@@ -39,7 +39,7 @@ class ModelParams:
     """Helper class to store model parameters for `Cartesian6dPositionEffector`.
 
     Attributes:
-        joints: The joints of body to control.
+        joints: The joints of body to be controlled.
         link_id: The id of the link to be controlled. The Cartesian 6 DoF poses fed to
             the effector are about this link's origin with respect to the world frame.
     """
@@ -53,7 +53,8 @@ class ControlParams:
     """Helper class to store control parameters for `Cartesian6dPositionEffector`.
 
     Attributes:
-        speed: The desired speed of the body.
+        speed: The velocity of the body. ATM, unsure if this is the per-link
+            velocities or solely the controlled link's velocity.
         max_control_timesteps: The maximum amount of time in seconds the effector
             will spend controlling the joints of the body.
         max_joint_position_error: The maximum absolute error that is allowed between
@@ -69,14 +70,11 @@ class ControlParams:
     speed: float = 1e-3
     max_joint_position_error: float = 1e-3
     nullspace_reference: Optional[np.ndarray] = None
-    joint_damping: float = 1e-3
+    joint_damping: float = 1e-5
 
 
 class Cartesian6dPositionEffector(effector.Effector):
-    """A Cartesian 6D position effector interface for a robot arm.
-
-    This effector uses PyBullet's underlying PD controller to position
-    """
+    """A Cartesian 6D position effector interface for a robot arm."""
 
     def __init__(
         self,
@@ -84,7 +82,7 @@ class Cartesian6dPositionEffector(effector.Effector):
         control_params: ControlParams,
         pb_client: BulletClient,
     ) -> None:
-        """Initializes a PD control-based 6D Cartesian position effector.
+        """Initializes a PD control 6D Cartesian position effector.
 
         Args:
             model_params: A `ModelParams` instance.
@@ -132,7 +130,7 @@ class Cartesian6dPositionEffector(effector.Effector):
 
         # Use IK to map the desired Cartesian 6D pose to joint positions.
         joint_target = self._ik_solver.solve(
-            geometry.Pose(cartesian_6d_target[:3], cartesian_6d_target[3:])
+            geometry.Pose(cartesian_6d_target[:3], cartesian_6d_target[3:]),
         )
 
         # IK can fail to find a solution, in which case we exit.

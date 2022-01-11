@@ -18,8 +18,6 @@ def main(bullet_client: client.BulletClient) -> None:
         gripper = SchunkWsg50(bullet_client, scaling=1.0)
         gripper.reset_pose([0.5, -0.5, 0.1])
 
-        print("hi")
-
         robot = Robot(
             pb_client=bullet_client,
             arm=arm,
@@ -36,8 +34,8 @@ def main(bullet_client: client.BulletClient) -> None:
 
     # Create a pose distribution from which to sample the pose of the block.
     pos_dist = pose_distribution.UniformPoseDistribution(
-        min_pose_bounds=[0.5, -0.5, 0.1, 0, 0, 0],
-        max_pose_bounds=[0.7, 0.5, 0.2, 0, 0, 0],
+        min_pose_bounds=[0.3, -0.5, 0.1, 0, 0, 0],
+        max_pose_bounds=[0.55, +0.5, 0.1, 0, 0, np.pi],
     )
     rng = np.random.RandomState()
 
@@ -49,9 +47,9 @@ def main(bullet_client: client.BulletClient) -> None:
         for _ in range(steps_per_second):
             bullet_client.step()
 
-        pos, _ = block.get_pose()
+        pos, quat = block.get_pose()
         pos[-1] += block.half_extents[-1] + 5e-2
-        eef_pose = geometry.Pose(pos)
+        eef_pose = geometry.Pose(pos, quat)
 
         try:
             robot.position_gripper(eef_pose.position, eef_pose.quaternion)
@@ -69,6 +67,6 @@ if __name__ == "__main__":
         mode=client.ConnectionMode.GUI,
         config=client.ClientConfig(),
     )
-    bullet_client.load_urdf("objects/plane/plane.urdf", maximal_coordinates=True)
+    bullet_client.load_urdf("objects/short_floor.urdf")
     main(bullet_client)
     bullet_client.disconnect()

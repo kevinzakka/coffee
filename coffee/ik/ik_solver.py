@@ -35,19 +35,10 @@ class IKSolver:
     """
 
     pb_client: BulletClient
-    """The pybullet client."""
-
     joints: Joints
-    """The joints used to achieve the desired target pose."""
-
     ik_point_joint_id: int
-    """The id of the joint attached to the link being placed by the IK solver."""
-
     joint_damping: float = 0.0
-    """The damping coefficient used to stabilize the IK solution."""
-
     nullspace_reference: Optional[np.ndarray] = None
-    """"""
 
     def __post_init__(self) -> None:
         if self.nullspace_reference is None:
@@ -58,17 +49,25 @@ class IKSolver:
         # See: https://github.com/bulletphysics/bullet3/issues/2603
         self._shadow_client = BulletClient.create(
             mode=ConnectionMode.DIRECT,
-            config=ClientConfig(realtime=False, render_shadows=False),
+            config=ClientConfig(),
         )
         manipulator_kwargs = self.pb_client._body_cache[self.joints.body_id]
         shadow_body_id = self._shadow_client.load_urdf(**manipulator_kwargs)
+
+        # Make sure the shadow robot is in the same world pose as the actual one.
+        pos, quat = self.pb_client.getBasePositionAndOrientation(self.joints.body_id)
+        self._shadow_client.resetBasePositionAndOrientation(
+            bodyUniqueId=shadow_body_id,
+            posObj=pos,
+            ornObj=quat,
+        )
         self._shadow_joints = Joints.from_body_id(shadow_body_id, self._shadow_client)
 
     def solve(
         self,
         ref_pose: Pose,
-        linear_tol: float = 1e-4,
-        angular_tol: float = 1e-4,
+        linear_tol: float = 1e-3,
+        angular_tol: float = 1e-3,
         max_steps: int = 100,
         num_attempts: int = 100,
         stop_on_first_successful_attempt: bool = False,
@@ -187,6 +186,7 @@ class IKSolver:
                 break
 
         if not success:
+            print(linear_err, angular_err)
             print(f"Unable to solve inverse kinematics for ref_pose: {ref_pose}")
         else:
             if verbose:

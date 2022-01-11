@@ -28,11 +28,20 @@ _ARM_PARAMS = [
         "joint_resting_configuration": np.array(
             [j * np.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.0]]
         ),
+        "base_position": np.zeros(3),
     },
     {
         "testcase_name": "arm_xarm7",
         "urdf": "robot_arms/ufactory/xarm7_description/xarm7.urdf",
         "joint_resting_configuration": np.array([0] * 7),
+        "base_position": np.zeros(3),
+    },
+    {
+        "testcase_name": "arm_iiwa",
+        "urdf": "robot_arms/kuka/iiwa_description/urdf/iiwa14_polytope_collision.urdf",
+        "joint_resting_configuration": np.array([0] * 7),
+        # NOTE(kevin): The iiwa is a big robot, so we scooch it backwards a bit.
+        "base_position": np.array([-0.1, 0, 0]),
     },
 ]
 
@@ -45,8 +54,9 @@ class IKSolverTest(BulletMultiDirectParameterizedTestCase):
         self,
         urdf: str,
         joint_resting_configuration: np.ndarray,
+        base_position: np.ndarray,
     ) -> None:
-        body_id = self.client.load_urdf(urdf)
+        body_id = self.client.load_urdf(urdf, pose=geometry.Pose(base_position))
         joints = Joints.from_body_id(body_id=body_id, pb_client=self.client)
         ik_solver = IKSolver(
             pb_client=self.client,
@@ -64,8 +74,9 @@ class IKSolverTest(BulletMultiDirectParameterizedTestCase):
         self,
         urdf: str,
         joint_resting_configuration: np.ndarray,
+        base_position: np.ndarray,
     ) -> None:
-        body_id = self.client.load_urdf(urdf)
+        body_id = self.client.load_urdf(urdf, pose=geometry.Pose(base_position))
         joints = Joints.from_body_id(body_id=body_id, pb_client=self.client)
         ik_solver = IKSolver(
             pb_client=self.client,
@@ -85,12 +96,13 @@ class IKSolverTest(BulletMultiDirectParameterizedTestCase):
         self,
         urdf: str,
         joint_resting_configuration: np.ndarray,
+        base_position: np.ndarray,
     ) -> None:
         # Seed to prevent flaky tests.
         np.random.seed(_SEED)
         rng = np.random.RandomState(_SEED)
 
-        body_id = self.client.load_urdf(urdf)
+        body_id = self.client.load_urdf(urdf, pose=geometry.Pose(base_position))
         joints = Joints.from_body_id(body_id=body_id, pb_client=self.client)
 
         ik_solver = IKSolver(
@@ -98,13 +110,12 @@ class IKSolverTest(BulletMultiDirectParameterizedTestCase):
             ik_point_joint_id=joints.get_joint_index_from_link_name("ee_link"),
             joints=joints,
             nullspace_reference=joint_resting_configuration,
-            joint_damping=1e-3,
         )
 
         # Create a distribution from which reference poses will be sampled.
         pos_dist = pose_distribution.UniformPoseDistribution(
-            min_pose_bounds=[0.20, -0.15, 0.20, 2 * np.pi / 3, -np.pi / 5, -np.pi / 4],
-            max_pose_bounds=[0.25, +0.15, 0.30, 4 * np.pi / 3, np.pi / 5, np.pi / 4],
+            min_pose_bounds=[0.30, -0.25, 0.30, 2 * np.pi / 3, -np.pi / 5, -np.pi / 4],
+            max_pose_bounds=[0.55, 0.25, 0.40, 4 * np.pi / 3, np.pi / 5, np.pi / 4],
         )
 
         # Each such iteration checks for the following:
@@ -118,7 +129,9 @@ class IKSolverTest(BulletMultiDirectParameterizedTestCase):
 
             # Check that we can solve the IK problem and that the solution respects the
             # joint limits.
-            qpos_sol = ik_solver.solve(ref_pose, num_attempts=30, max_steps=10)
+            qpos_sol = ik_solver.solve(
+                ref_pose, linear_tol=_LINEAR_TOL, angular_tol=_ANGULAR_TOL
+            )
             self.assertIsNotNone(qpos_sol)
             assert qpos_sol is not None  # This is so mypy doesn't complain.
             min_range = joints.joints_lower_limit

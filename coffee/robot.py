@@ -149,7 +149,8 @@ class Robot:
         # Use IK to map the desired Cartesian 6D pose to joint positions.
         joint_target = self._ik_solver.solve(
             geometry.Pose(position, quaternion),
-            num_attempts=300,
+            num_attempts=100,
+            max_steps=500,
         )
 
         # If IK fails to find a solution, throw an error.
