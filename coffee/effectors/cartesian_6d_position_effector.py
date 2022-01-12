@@ -74,7 +74,10 @@ class ControlParams:
 
 
 class Cartesian6dPositionEffector(effector.Effector):
-    """A Cartesian 6D position effector interface for a robot arm."""
+    """A Cartesian 6D position effector interface for a robot arm.
+
+    Uses PyBullet's PD controller under the hood.
+    """
 
     def __init__(
         self,
@@ -82,7 +85,7 @@ class Cartesian6dPositionEffector(effector.Effector):
         control_params: ControlParams,
         pb_client: BulletClient,
     ) -> None:
-        """Initializes a PD control 6D Cartesian position effector.
+        """Initializes a 6-DoF Cartesian position effector.
 
         Args:
             model_params: A `ModelParams` instance.

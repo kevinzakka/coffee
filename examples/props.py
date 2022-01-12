@@ -1,3 +1,5 @@
+"""Load some props."""
+
 from coffee import client
 from coffee.models import props
 

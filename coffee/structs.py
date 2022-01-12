@@ -6,7 +6,11 @@ from typing import Optional, Tuple
 
 # Constants.
 
+# Links in a body have a positive index ranging from 0 to `getNumJoints()`. Since the
+# base link is not a regular link, it is assigned a value of -1.
 BASE_LINK_ID: int = -1
+
+# A mass of 0 in PyBullet makes the body static.
 STATIC_MASS: float = 0.0
 
 # Structs.

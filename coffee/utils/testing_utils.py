@@ -25,16 +25,16 @@ _INF = np.inf
 
 
 class BulletMultiDirectTestCase(absltest.TestCase):
-    """PyBullet absltest.TestCase that uses a DIRECT connection for each test method.
+    """PyBullet `absltest.TestCase` for DIRECT connections.
 
-    Each class fixture creates its own server-client pair in DIRECT mode. Connects upon
-    construction and disconnects upon destruction.
+    Each class fixture creates its own server-client pair in DIRECT mode at setup and
+    disconnects at teardown.
     """
 
     def setUp(self) -> None:
         self.client = BulletClient.create(
             mode=ConnectionMode.DIRECT,
-            config=ClientConfig(realtime=False),
+            config=ClientConfig(),
         )
 
     def tearDown(self) -> None:
@@ -47,7 +47,7 @@ class BulletMultiDirectParameterizedTestCase(parameterized.TestCase):
     def setUp(self) -> None:
         self.client = BulletClient.create(
             mode=ConnectionMode.DIRECT,
-            config=ClientConfig(realtime=False),
+            config=ClientConfig(),
         )
 
     def tearDown(self) -> None:

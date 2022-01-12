@@ -5,7 +5,6 @@ import dataclasses
 import enum
 import functools
 import inspect
-import os
 import pkgutil
 import platform
 import threading
@@ -68,7 +67,6 @@ class BulletClient:
     mode: ConnectionMode
     config: ClientConfig
     client_id: int
-    pid: int
     post_init_setup: bool
 
     # This will store all the information that was used to load an object into the
@@ -82,19 +80,18 @@ class BulletClient:
         config: ClientConfig,
     ) -> BulletClient:
         options = _gui_options(config)
-        pid = os.getpid()
 
         # If SHARED_MEMORY, try to connect to an existing simulation.
         if mode.value == p.SHARED_MEMORY:
             client_id = p.connect(p.SHARED_MEMORY, options=options)
             if client_id >= 0:
                 print(f"Successfully connected to existing client: {client_id}.")
-                return cls(mode, config, client_id, pid, False)
+                return cls(mode, config, client_id, False)
 
         client_id = p.connect(mode.value, options=options)
         if client_id < 0:
             raise Exception("Could not connect to PyBullet server.")
-        return cls(mode, config, client_id, pid, True)
+        return cls(mode, config, client_id, True)
 
     def __post_init__(self) -> None:
         # Thread locks to safely access thread-unsafe attributes.
@@ -110,7 +107,7 @@ class BulletClient:
         self.setAdditionalSearchPath(str(_URDF_PATH))
 
     def __repr__(self) -> str:
-        return f"BulletClient(client_id={self.client_id}, pid={self.pid})"
+        return f"BulletClient(client_id={self.client_id})"
 
     def __getattr__(self, name: str) -> Callable:
         """Injects the client ID into all method calls."""
@@ -197,7 +194,7 @@ class BulletClient:
             pass
 
     def __del__(self) -> None:
-        if self.client_id >= 0 and self.pid == os.getpid():
+        if self.client_id >= 0:
             self.disconnect()
 
     def step(self) -> None:

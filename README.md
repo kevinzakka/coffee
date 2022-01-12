@@ -1,6 +1,6 @@
 # coffee
 
-Writing a [dm_robotics](https://github.com/deepmind/dm_robotics) API for PyBullet. Work very much in progress.
+Writing a Deepmind Robotics [moma](https://github.com/deepmind/dm_robotics/tree/main/py/moma) API for PyBullet. Work very much in progress.
 
 ## References
 

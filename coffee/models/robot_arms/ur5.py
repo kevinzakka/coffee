@@ -21,7 +21,7 @@ class UR5(robot_arm.RobotArm):
         max_joint_position_error: float = consts.MAX_JOINT_POSITION_ERROR,
     ) -> None:
         flags = pb_client.URDF_ENABLE_CACHED_GRAPHICS_SHAPES
-        flags |= pb_client.URDF_USE_SELF_COLLISION  # type: ignore
+        # flags |= pb_client.URDF_USE_SELF_COLLISION  # type: ignore
 
         body_id = pb_client.load_urdf(
             str(consts.UR5_URDF),

@@ -2,6 +2,8 @@
 
 It was originally written by https://github.com/caelan/pybullet-planning and
 adapted by https://github.com/columbia-ai-robotics/adagrasp.
+
+The original code is licensed under the MIT license.
 """
 
 import uuid

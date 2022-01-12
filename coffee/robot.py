@@ -10,12 +10,12 @@ from coffee.ik.ik_solver import IKSolver
 from coffee.joints import Joints
 from coffee.models.end_effectors.robot_hands import robot_hand
 from coffee.models.robot_arms import robot_arm
-from coffee.third_party.urdf_editor import UrdfEditor
+from coffee.third_party.urdf_editor import urdf_editor
 
 
 @dataclasses.dataclass
 class Robot:
-    """A Robot represents the union of an arm, a bracelet and a gripper."""
+    """A Robot represents the union of an arm and a gripper."""
 
     pb_client: client.BulletClient
     arm: robot_arm.RobotArm
@@ -65,10 +65,10 @@ class Robot:
         URDF via a fixed joint. It then deletes the previous two bodies from the
         simulation and loads the new URDF file as the combined arm + gripper body.
         """
-        arm_editor = UrdfEditor()
+        arm_editor = urdf_editor.UrdfEditor()
         arm_editor.initializeFromBulletBody(self.arm.body_id, self.pb_client.client_id)
 
-        hand_editor = UrdfEditor()
+        hand_editor = urdf_editor.UrdfEditor()
         hand_editor.initializeFromBulletBody(
             self.gripper.body_id, self.pb_client.client_id
         )
@@ -121,13 +121,6 @@ class Robot:
     def gripper_dof(self) -> int:
         return self._gripper_dof
 
-    # @property
-    # def effectors(self) -> List[effector.Effector]:
-    #     effectors = [self._arm_effector]
-    #     if self.gripper_effector is not None:
-    #         effectors.append(self.gripper_effector)
-    #     return effectors
-
     # Methods.
 
     def position_arm_joints(self, joint_angles: np.ndarray) -> None:
@@ -147,11 +140,7 @@ class Robot:
     def position_gripper(self, position: np.ndarray, quaternion: np.ndarray) -> None:
         """Resets the gripper IK point position to the desired pose."""
         # Use IK to map the desired Cartesian 6D pose to joint positions.
-        joint_target = self._ik_solver.solve(
-            geometry.Pose(position, quaternion),
-            num_attempts=100,
-            max_steps=500,
-        )
+        joint_target = self._ik_solver.solve(geometry.Pose(position, quaternion))
 
         # If IK fails to find a solution, throw an error.
         if joint_target is None:

@@ -1,3 +1,5 @@
+"""Place an arm in the world and reset its joints to their resting configuration."""
+
 from coffee import client
 from coffee.models import robot_arms
 

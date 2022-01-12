@@ -1,4 +1,4 @@
-"""An example of how to modify the PyBullet GUI."""
+"""Modify the PyBullet GUI, such as the color of the sky."""
 
 import dataclasses
 from typing import Optional, Tuple

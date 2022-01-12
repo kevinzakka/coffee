@@ -14,7 +14,6 @@ setup(
         "pybullet",
         "dm_robotics-transformations",
         "dm_robotics-geometry",
-        "dm-env",
     ],
     extras_require={
         "testing": [
