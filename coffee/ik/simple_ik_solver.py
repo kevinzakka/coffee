@@ -15,25 +15,23 @@ from coffee.utils import geometry_utils
 
 @dataclasses.dataclass
 class SimpleIKSolver:
-    """A wrapper around PyBullet's IK solver."""
+    """A simple IK solver.
+
+    This is a barebones wrapper over PyBullet's `calculateInverseKinematics` method. It
+    does not use any of the nullspace arguments in the function call. For a more robust
+    IK solver, see `ik_solver.IKSolver`.
+    """
 
     pb_client: BulletClient
-    """The pybullet client."""
-
     joints: Joints
-    """The joints used to achieve the desired target pose."""
-
     ik_point_joint_id: int
-    """The id of the joint attached to the link being placed by the IK solver."""
-
-    joint_damping: float = 0.0
-    max_num_iterations: int = 500
-    residual_threshold: float = 1e-5
-    """Damped least squares parameters."""
+    joint_damping: float = 1e-5
 
     def solve(
         self,
         ref_pose: Pose,
+        max_num_iterations: int = 500,
+        residual_threshold: float = 1e-5,
     ) -> Optional[np.ndarray]:
         try:
             qpos = self.pb_client.calculateInverseKinematics(
@@ -43,8 +41,8 @@ class SimpleIKSolver:
                 targetOrientation=geometry_utils.as_quaternion_xyzw(
                     ref_pose.quaternion
                 ),
-                residualThreshold=self.residual_threshold,
-                maxNumIterations=self.max_num_iterations,
+                residualThreshold=residual_threshold,
+                maxNumIterations=max_num_iterations,
                 jointDamping=self.joints.const_array(self.joint_damping).tolist(),
             )
             if np.isnan(np.sum(qpos)):
@@ -56,8 +54,6 @@ class SimpleIKSolver:
                     a_min=self.joints.joints_lower_limit,
                     a_max=self.joints.joints_upper_limit,
                 )
-
-                # TODO(kevin) Canonicalise to [0, 2*pi].
         except p.error:
             qpos = None
         return qpos

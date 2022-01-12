@@ -1,7 +1,5 @@
 from typing import Optional
 
-import numpy as np
-
 from coffee.client import BulletClient
 from coffee.hints import Array
 from coffee.models.robot_arms import panda_constants as consts
@@ -19,9 +17,11 @@ class Panda(robot_arm.RobotArm):
         ik_point_link_name: Optional[str] = consts.IK_POINT_LINK_NAME,
         fixed_base: bool = consts.FIXED_BASE,
         max_joint_position_error: float = consts.MAX_JOINT_POSITION_ERROR,
+        enable_self_collision: bool = consts.ENABLE_SELF_COLLISION,
     ) -> None:
         flags = pb_client.URDF_ENABLE_CACHED_GRAPHICS_SHAPES
-        # flags |= pb_client.URDF_USE_SELF_COLLISION  # type: ignore
+        if enable_self_collision:
+            flags |= pb_client.URDF_USE_SELF_COLLISION  # type: ignore
 
         body_id = pb_client.load_urdf(
             str(consts.PANDA_URDF),
@@ -38,6 +38,3 @@ class Panda(robot_arm.RobotArm):
             fixed_base=fixed_base,
             max_joint_position_error=max_joint_position_error,
         )
-
-    def set_joint_angles(self, joint_angles: np.ndarray) -> None:
-        pass

@@ -130,7 +130,10 @@ class IKSolverTest(BulletMultiDirectParameterizedTestCase):
             # Check that we can solve the IK problem and that the solution respects the
             # joint limits.
             qpos_sol = ik_solver.solve(
-                ref_pose, linear_tol=_LINEAR_TOL, angular_tol=_ANGULAR_TOL
+                ref_pose,
+                linear_tol=_LINEAR_TOL,
+                angular_tol=_ANGULAR_TOL,
+                num_attempts=100,
             )
             self.assertIsNotNone(qpos_sol)
             assert qpos_sol is not None  # This is so mypy doesn't complain.

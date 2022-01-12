@@ -6,7 +6,6 @@ _DEFAULT_FRICTION = (1.0, 1.0, 0.0001)
 _DARK_COLOR = (0.1, 0.1, 0.1, 1)
 _GRAY_COLOR = (0.5, 0.5, 0.5, 1)
 _LINK_NAME_TO_COLOR = {
-    # "palm": _GRAY_COLOR,
     "left_inner": _GRAY_COLOR,
     "left_outer": _GRAY_COLOR,
     "left_finger": _DARK_COLOR,
@@ -29,6 +28,7 @@ _MIMIC_COEFFICIENTS = {
     "right_outer": -1,
     "right_finger": 1,
 }
+_TCP_LINK_NAME = "pinch_site"
 
 
 class RG2(robot_hand.RobotHand):
@@ -40,15 +40,16 @@ class RG2(robot_hand.RobotHand):
         name: str = "rg2",
         use_realistic_friction: bool = True,
         scaling: float = 1.0,
+        enable_self_collision: bool = consts.ENABLE_SELF_COLLISION,
     ) -> None:
         flags = pb_client.URDF_ENABLE_CACHED_GRAPHICS_SHAPES
-        # flags |= pb_client.URDF_USE_SELF_COLLISION  # type: ignore
+        if enable_self_collision:
+            flags |= pb_client.URDF_USE_SELF_COLLISION  # type: ignore
 
         body_id = pb_client.load_urdf(
             str(consts.RG2_URDF),
             flags=flags,
             scaling=scaling,
-            # useFixedBase=True,
         )
 
         super().__init__(
@@ -103,5 +104,6 @@ class RG2(robot_hand.RobotHand):
             positionGains=[2 * 0.1] * len(self._mimic_children_ids),
         )
 
-    def tool_center_point(self):
-        pass
+    @property
+    def tool_center_point(self) -> str:
+        return _TCP_LINK_NAME

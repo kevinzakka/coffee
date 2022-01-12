@@ -1,3 +1,8 @@
+# Some implementation details regarding PyBullet:
+#
+# PyBullet's IK solver uses damped least squares (DLS) optimization. This is commonly
+# known as Levenberg-Marquardt (LM) optimization.
+
 from __future__ import annotations
 
 import dataclasses
@@ -15,14 +20,17 @@ from coffee.utils import geometry_utils
 
 
 class IKSolution(NamedTuple):
-    """An IK solution returned by the IKSolver."""
+    """An IK solution returned by the IKSolver.
+
+    Attributes:
+        qpos: The joint configuration.
+        linear_err: The linear error between the solved pose and the target pose.
+        angular_err: The angular error between the solved pose and the target pose.
+    """
 
     qpos: np.ndarray
-    """The joint configuration."""
     linear_err: float
-    """The linear error between the solved pose and the target pose."""
     angular_err: float
-    """The angular error between the solved pose and the target pose."""
 
 
 @dataclasses.dataclass
@@ -30,8 +38,7 @@ class IKSolver:
     """Inverse kinematics solver.
 
     Computes a joint configuration that brings an element (in a kinematic chain) to a
-    desired pose. Uses PyBullet's `calculateInverseKinematics` method under the hood,
-    which implements damped least squares (aka Levenberg-Marquardt) IK.
+    desired pose.
     """
 
     pb_client: BulletClient
@@ -69,7 +76,7 @@ class IKSolver:
         linear_tol: float = 1e-3,
         angular_tol: float = 1e-3,
         max_steps: int = 100,
-        num_attempts: int = 100,
+        num_attempts: int = 50,
         stop_on_first_successful_attempt: bool = False,
         inital_joint_configuration: Optional[np.ndarray] = None,
         nullspace_reference: Optional[np.ndarray] = None,
@@ -179,14 +186,15 @@ class IKSolver:
 
             if verbose:
                 print(
-                    f"attempt: {attempt} - nullspace_jnt_qpos_min_err: {nullspace_jnt_qpos_min_err} - success: {success}"
+                    f"attempt: {attempt} "
+                    f"- nullspace_jnt_qpos_min_err: {nullspace_jnt_qpos_min_err:.4f} "
+                    f"- success: {success}"
                 )
 
             if success and stop_on_first_successful_attempt:
                 break
 
         if not success:
-            print(linear_err, angular_err)
             print(f"Unable to solve inverse kinematics for ref_pose: {ref_pose}")
         else:
             if verbose:

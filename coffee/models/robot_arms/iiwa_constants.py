@@ -28,3 +28,6 @@ FIXED_BASE: bool = True
 
 # Max joint position error.
 MAX_JOINT_POSITION_ERROR: float = 1e-4
+
+# By default, Bullet disables self-collision.
+ENABLE_SELF_COLLISION = False

@@ -4,7 +4,7 @@ import numpy as np
 from absl.testing import absltest
 
 from coffee.joints import Joints
-from coffee.utils.testing_utils import _PI, _TWO_PI, BulletMultiDirectTestCase
+from coffee.utils.testing_utils import _PI, BulletMultiDirectTestCase
 
 
 class JointsTest(BulletMultiDirectTestCase):
@@ -29,14 +29,14 @@ class JointsTest(BulletMultiDirectTestCase):
         self.assertTrue(
             np.allclose(
                 joints.joints_lower_limit,
-                [-_TWO_PI, -_TWO_PI, -_PI, -_TWO_PI, -_TWO_PI, -_TWO_PI],
+                [-_PI, -_PI, -_PI, -_PI, -_PI, -_PI],
             )
         )
 
         self.assertTrue(
             np.allclose(
                 joints.joints_upper_limit,
-                [_TWO_PI, _TWO_PI, _PI, _TWO_PI, _TWO_PI, _TWO_PI],
+                [_PI, _PI, _PI, _PI, _PI, _PI],
             )
         )
 

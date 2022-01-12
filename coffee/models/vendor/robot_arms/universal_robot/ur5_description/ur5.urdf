@@ -1,4 +1,9 @@
 <?xml version="1.0" ?>
+<!--
+  NOTE(kevin): Joint limiting the UR5 seems to help with PyBullet's IK function.
+  There's a discussion on GitHub regarding this restriction for MoveIt, see:
+  https://github.com/ros-industrial/universal_robot/issues/265
+-->
 <robot name="universal_robot">
   <link name="base_link">
     <visual>
@@ -26,8 +31,8 @@
     <!-- <origin rpy="0.0 0.0 3.141592653589793" xyz="0.0 0.0 0.089159"/> -->
     <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.089159"/>
     <axis xyz="0 0 1"/>
-    <limit effort="150.0" lower="-6.28318530718" upper="6.28318530718" velocity="3.15"/>
-    <!-- <limit effort="150.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.15"/> -->
+    <!-- <limit effort="150.0" lower="-6.28318530718" upper="6.28318530718" velocity="3.15"/> -->
+    <limit effort="150.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.15"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
   <link name="shoulder_link">
@@ -55,8 +60,8 @@
     <child link="upper_arm_link"/>
     <origin rpy="0.0 1.57079632679 0.0" xyz="0.0 0.13585 0.0"/>
     <axis xyz="0 1 0"/>
-    <limit effort="150.0" lower="-6.28318530718" upper="6.28318530718" velocity="3.15"/>
-    <!-- <limit effort="150.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.15"/> -->
+    <!-- <limit effort="150.0" lower="-6.28318530718" upper="6.28318530718" velocity="3.15"/> -->
+    <limit effort="150.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.15"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
   <link name="upper_arm_link">
@@ -112,8 +117,8 @@
     <child link="wrist_1_link"/>
     <origin rpy="0.0 1.57079632679 0.0" xyz="0.0 0.0 0.39225"/>
     <axis xyz="0 1 0"/>
-    <limit effort="28.0" lower="-6.28318530718" upper="6.28318530718" velocity="3.2"/>
-    <!-- <limit effort="28.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.2"/> -->
+    <!-- <limit effort="28.0" lower="-6.28318530718" upper="6.28318530718" velocity="3.2"/> -->
+    <limit effort="28.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.2"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
   <link name="wrist_1_link">
@@ -141,8 +146,8 @@
     <child link="wrist_2_link"/>
     <origin rpy="0.0 0.0 0.0" xyz="0.0 0.093 0.0"/>
     <axis xyz="0 0 1"/>
-    <limit effort="28.0" lower="-6.28318530718" upper="6.28318530718" velocity="3.2"/>
-    <!-- <limit effort="28.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.2"/> -->
+    <!-- <limit effort="28.0" lower="-6.28318530718" upper="6.28318530718" velocity="3.2"/> -->
+    <limit effort="28.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.2"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
   <link name="wrist_2_link">
@@ -170,8 +175,8 @@
     <child link="wrist_3_link"/>
     <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.09465"/>
     <axis xyz="0 1 0"/>
-    <limit effort="28.0" lower="-6.28318530718" upper="6.28318530718" velocity="3.2"/>
-    <!-- <limit effort="28.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.2"/> -->
+    <!-- <limit effort="28.0" lower="-6.28318530718" upper="6.28318530718" velocity="3.2"/> -->
+    <limit effort="28.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.2"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
   <link name="wrist_3_link">

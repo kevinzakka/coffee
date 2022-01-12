@@ -12,8 +12,8 @@
       <geometry>
         <mesh filename="meshes/palm.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="White">
-        <color rgba="1.0 1.0 1.0 1.0"/>
+      <material name="grey">
+        <color rgba="0.5 0.5 0.5 1"/>
       </material>
     </visual>
     <collision>
@@ -56,7 +56,7 @@
       <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
     </inertial>
   </link>
-  
+
   <joint name="palm_left_outer_joint" type="revolute">
     <origin rpy="0 -0.43 0" xyz="-0.017 0.0 0.055"/>
     <axis xyz="0 1 0"/>
@@ -143,7 +143,7 @@
       <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
     </inertial>
   </link>
-  
+
   <joint name="palm_right_outer_joint" type="revolute">
     <origin rpy="0 0.43 0" xyz="0.017 0.0 0.055"/>
     <axis xyz="0 1 0"/>
@@ -200,5 +200,30 @@
       <mass value="1"/>
       <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
     </inertial>
+  </link>
+
+  <joint name="tcp_joint" type="fixed">
+    <parent link="palm"/>
+    <child link="pinch_site"/>
+    <origin rpy="3.141592653589793 0 0" xyz="0 0 0.135"/>
+  </joint>
+  <link name="pinch_site">
+    <collision>
+      <geometry>
+        <box size="0 0 0"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0"/>
+      <origin rpy="0. 0. 0." xyz="0 0 0"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </visual>
   </link>
 </robot>

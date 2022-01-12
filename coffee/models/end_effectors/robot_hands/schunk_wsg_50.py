@@ -4,9 +4,7 @@ from coffee.models.end_effectors.robot_hands import schunk_wsg_50_constants as c
 
 _DEFAULT_FRICTION = (1.0, 1.0, 0.0001)
 _DARK_COLOR = (0.1, 0.1, 0.1, 1)
-_GRAY_COLOR = (0.5, 0.5, 0.5, 1)
 _LINK_NAME_TO_COLOR = {
-    # "base_link": _GRAY_COLOR,
     "gripper_left": _DARK_COLOR,
     "gripper_right": _DARK_COLOR,
     "finger_left": _DARK_COLOR,
@@ -29,9 +27,11 @@ class SchunkWsg50(robot_hand.RobotHand):
         name: str = "schunk_wsg_50",
         use_realistic_friction: bool = True,
         scaling: float = 1.0,
+        enable_self_collision: bool = consts.ENABLE_SELF_COLLISION,
     ) -> None:
         flags = pb_client.URDF_ENABLE_CACHED_GRAPHICS_SHAPES
-        flags |= pb_client.URDF_USE_SELF_COLLISION  # type: ignore
+        if enable_self_collision:
+            flags |= pb_client.URDF_USE_SELF_COLLISION  # type: ignore
 
         body_id = pb_client.load_urdf(
             str(consts.SCHUNK_WSG_50_URDF),

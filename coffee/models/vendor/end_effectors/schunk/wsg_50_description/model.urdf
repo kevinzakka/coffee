@@ -15,20 +15,6 @@
        xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
        xmlns:physics="http://playerstage.sourceforge.net/gazebo/xmlschema/#physics">
 
-  <!-- <link name="mount_base">
-    <origin xyz="0 0 0"/>
-    <inertial>
-      <mass value="0.001"/>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <inertia ixx="0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
-    </inertial>
-  </link>
-  <joint name="mount_base_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <parent link="mount_base"/>
-    <child link="base_link"/>
-  </joint> -->
-
   <!-- BASE LINK -->
   <link name="wsg_base_link">
     <inertial>
@@ -36,7 +22,6 @@
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
       <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="1.0"  iyz="0.0"  izz="1.0" />
     </inertial>
-
     <visual>
       <origin xyz="0.0 0 0" rpy="0 0 0" />
       <geometry>
@@ -46,7 +31,6 @@
         <color rgba="0.5 0.5 0.5 1"/>
       </material>
     </visual>
-
     <collision>
       <origin xyz="0.0 0 0" rpy="0 0 0" />
       <geometry>

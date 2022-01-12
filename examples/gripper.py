@@ -4,19 +4,22 @@ import numpy as np
 from dm_robotics.geometry import geometry, pose_distribution
 
 from coffee import client
-from coffee.models import props, robot_arms
-from coffee.models.end_effectors.robot_hands.schunk_wsg_50 import SchunkWsg50
+from coffee.models import end_effectors, props, robot_arms
 from coffee.robot import Robot
+from coffee.wrappers import frame_visualizer
 
 
 def main(bullet_client: client.BulletClient) -> None:
     with bullet_client.disable_rendering():
-        arm = robot_arms.UR5(bullet_client)
+        arm = robot_arms.UR5(bullet_client, enable_self_collision=True)
         # arm = robot_arms.xArm7(bullet_client)
         # arm = robot_arms.IIWA(bullet_client)
+        # arm = robot_arms.Panda(bullet_client)
 
-        gripper = SchunkWsg50(bullet_client, scaling=1.0)
+        gripper = end_effectors.robot_hands.SchunkWsg50(bullet_client, scaling=1.0)
         gripper.reset_pose([0.5, -0.5, 0.1])
+        # gripper = end_effectors.robot_hands.RG2(bullet_client, scaling=1.0)
+        # gripper.reset_pose([0.5, -0.5, 0.1])
 
         robot = Robot(
             pb_client=bullet_client,
@@ -26,11 +29,13 @@ def main(bullet_client: client.BulletClient) -> None:
             gripper_effector=None,  # type: ignore
             name=f"{arm.name}_{gripper.name}",
         )
+        robot.position_arm_joints(arm.joint_resting_configuration)
 
-        robot.position_arm_joints(robot.arm.joint_resting_configuration)
+        block = props.Box(bullet_client, color=(0.3412, 0.3490, 1, 1))
 
-    # Load a block prop.
-    block = props.Box(bullet_client, color=(0.3412, 0.3490, 1, 1))
+    frame_visualizer.FrameVisualizer(robot, bullet_client).draw_link_frame(  # type: ignore
+        robot.gripper.tool_center_point
+    )
 
     # Create a pose distribution from which to sample the pose of the block.
     pos_dist = pose_distribution.UniformPoseDistribution(
@@ -43,18 +48,15 @@ def main(bullet_client: client.BulletClient) -> None:
         # Randomize the object's pose.
         pos, quat = pos_dist.sample_pose(rng)
         block.reset_pose(pos, quat)
-        steps_per_second = int(2 / bullet_client.config.physics_timestep)
+        steps_per_second = int(1 / bullet_client.config.physics_timestep)
         for _ in range(steps_per_second):
             bullet_client.step()
 
         pos, quat = block.get_pose()
-        pos[-1] += block.half_extents[-1] + 5e-2
+        pos[-1] += block.half_extents[-1] + 5e-2  # Add 5cm slack.
         eef_pose = geometry.Pose(pos, quat)
 
-        try:
-            robot.position_gripper(eef_pose.position, eef_pose.quaternion)
-        except ValueError:
-            continue
+        robot.position_gripper(eef_pose.position, eef_pose.quaternion)
 
         steps_per_second = int(0.5 / bullet_client.config.physics_timestep)
         for _ in range(steps_per_second):

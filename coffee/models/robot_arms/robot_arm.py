@@ -63,10 +63,19 @@ class RobotArm(abc.ABC, body.NamedBody):
     def fixed_base(self) -> bool:
         return self._fixed_base
 
-    @abc.abstractmethod
     def set_joint_angles(self, joint_angles: np.ndarray) -> None:
         """Sets the joints of the robot to a given configuration.
 
         Args:
             joint_angles: The desired joints configuration for the robot arm.
         """
+        joint_angles = np.array(joint_angles)
+        assert len(joint_angles) == self.joints.dof
+
+        for i, joint_id in enumerate(self.joints.controllable_joints):
+            self.pb_client.resetJointState(
+                self.body_id,
+                joint_id,
+                targetValue=joint_angles[i],
+                targetVelocity=0.0,
+            )
