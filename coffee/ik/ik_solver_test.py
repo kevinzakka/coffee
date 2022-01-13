@@ -1,13 +1,17 @@
 """Tests for ik_solver."""
 
+from typing import Type, Union
+
 import numpy as np
 from absl.testing import absltest, parameterized
 from dm_robotics.geometry import geometry, pose_distribution
 from dm_robotics.transformations import transformations as tr
 
 from coffee.ik.ik_solver import IKSolver
-from coffee.joints import Joints
+from coffee.models import robot_arms
 from coffee.utils.testing_utils import BulletMultiDirectParameterizedTestCase
+
+RobotType = Union[robot_arms.UR5, robot_arms.Panda, robot_arms.xArm7, robot_arms.IIWA]
 
 # Linear and angular tolerance when comparing the end pose and the target pose.
 _LINEAR_TOL = 1e-4
@@ -19,27 +23,25 @@ _NUM_POSES = 50
 # RNG seed.
 _SEED = 42
 
-# TODO(kevin): Remove this once we create robot specific configs and a robot factory
-# class.
 _ARM_PARAMS = [
     {
         "testcase_name": "arm_ur5",
-        "urdf": "robot_arms/universal_robot/ur5_description/ur5.urdf",
-        "joint_resting_configuration": np.array(
-            [j * np.pi for j in [0, -0.5, 0.5, -0.5, -0.5, 0.0]]
-        ),
+        "robot_cls": robot_arms.UR5,
+        "base_position": np.zeros(3),
+    },
+    {
+        "testcase_name": "arm_panda",
+        "robot_cls": robot_arms.Panda,
         "base_position": np.zeros(3),
     },
     {
         "testcase_name": "arm_xarm7",
-        "urdf": "robot_arms/ufactory/xarm7_description/xarm7.urdf",
-        "joint_resting_configuration": np.array([0] * 7),
+        "robot_cls": robot_arms.xArm7,
         "base_position": np.zeros(3),
     },
     {
         "testcase_name": "arm_iiwa",
-        "urdf": "robot_arms/kuka/iiwa_description/urdf/iiwa14_polytope_collision.urdf",
-        "joint_resting_configuration": np.array([0] * 7),
+        "robot_cls": robot_arms.IIWA,
         # NOTE(kevin): The iiwa is a big robot, so we scooch it backwards a bit.
         "base_position": np.array([-0.1, 0, 0]),
     },
@@ -52,17 +54,16 @@ class IKSolverTest(BulletMultiDirectParameterizedTestCase):
     @parameterized.named_parameters(_ARM_PARAMS)
     def test_raises_when_nullspace_reference_wrong_length(
         self,
-        urdf: str,
-        joint_resting_configuration: np.ndarray,
+        robot_cls: Type[RobotType],
         base_position: np.ndarray,
     ) -> None:
-        body_id = self.client.load_urdf(urdf, pose=geometry.Pose(base_position))
-        joints = Joints.from_body_id(body_id=body_id, pb_client=self.client)
+        robot = robot_cls(pb_client=self.client)
+        robot.reset_pose(base_position)
         ik_solver = IKSolver(
             pb_client=self.client,
-            ik_point_joint_id=joints.get_joint_index_from_link_name("ee_link"),
-            joints=joints,
-            nullspace_reference=joint_resting_configuration,
+            ik_point_joint_id=robot.ik_point_link_id,
+            joints=robot.joints,
+            nullspace_reference=robot.joint_resting_configuration,
         )
         ref_pose = geometry.Pose([0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0])
         wrong_nullspace_ref = np.array([0.0, 0.0, 0.0])
@@ -70,19 +71,18 @@ class IKSolverTest(BulletMultiDirectParameterizedTestCase):
             ik_solver.solve(ref_pose, nullspace_reference=wrong_nullspace_ref)
 
     @parameterized.named_parameters(_ARM_PARAMS)
-    def test_raises_when_initial_joint_confiugration_wrong_length(
+    def test_raises_when_initial_joint_configuration_wrong_length(
         self,
-        urdf: str,
-        joint_resting_configuration: np.ndarray,
+        robot_cls: Type[RobotType],
         base_position: np.ndarray,
     ) -> None:
-        body_id = self.client.load_urdf(urdf, pose=geometry.Pose(base_position))
-        joints = Joints.from_body_id(body_id=body_id, pb_client=self.client)
+        robot = robot_cls(pb_client=self.client)
+        robot.reset_pose(base_position)
         ik_solver = IKSolver(
             pb_client=self.client,
-            ik_point_joint_id=joints.get_joint_index_from_link_name("ee_link"),
-            joints=joints,
-            nullspace_reference=joint_resting_configuration,
+            ik_point_joint_id=robot.ik_point_link_id,
+            joints=robot.joints,
+            nullspace_reference=robot.joint_resting_configuration,
         )
         ref_pose = geometry.Pose([0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0])
         wrong_initial_joint_configuration = np.array([0.0, 0.0, 0.0])
@@ -94,22 +94,21 @@ class IKSolverTest(BulletMultiDirectParameterizedTestCase):
     @parameterized.named_parameters(_ARM_PARAMS)
     def test_ik_solver_with_pose(
         self,
-        urdf: str,
-        joint_resting_configuration: np.ndarray,
+        robot_cls: Type[RobotType],
         base_position: np.ndarray,
     ) -> None:
         # Seed to prevent flaky tests.
         np.random.seed(_SEED)
         rng = np.random.RandomState(_SEED)
 
-        body_id = self.client.load_urdf(urdf, pose=geometry.Pose(base_position))
-        joints = Joints.from_body_id(body_id=body_id, pb_client=self.client)
+        robot = robot_cls(pb_client=self.client)
+        robot.reset_pose(base_position)
 
         ik_solver = IKSolver(
             pb_client=self.client,
-            ik_point_joint_id=joints.get_joint_index_from_link_name("ee_link"),
-            joints=joints,
-            nullspace_reference=joint_resting_configuration,
+            ik_point_joint_id=robot.ik_point_link_id,
+            joints=robot.joints,
+            nullspace_reference=robot.joint_resting_configuration,
         )
 
         # Create a distribution from which reference poses will be sampled.
@@ -137,15 +136,15 @@ class IKSolverTest(BulletMultiDirectParameterizedTestCase):
             )
             self.assertIsNotNone(qpos_sol)
             assert qpos_sol is not None  # This is so mypy doesn't complain.
-            min_range = joints.joints_lower_limit
-            max_range = joints.joints_upper_limit
+            min_range = robot.joints.joints_lower_limit
+            max_range = robot.joints.joints_upper_limit
             np.testing.assert_array_compare(np.less_equal, qpos_sol, max_range)
             np.testing.assert_array_compare(np.greater_equal, qpos_sol, min_range)
 
             # Manually set the joints of the robot to the solution and perform FK.
-            for i, joint_id in enumerate(joints.controllable_joints):
+            for i, joint_id in enumerate(robot.joints.controllable_joints):
                 self.client.resetJointState(
-                    body_id,
+                    robot.body_id,
                     joint_id,
                     qpos_sol[i],
                 )
